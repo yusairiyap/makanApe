@@ -24,6 +24,7 @@ export default function HomePage() {
   const { location: gpsLocation, gpsBlocked, requestGPS } = useGeolocation();
   const [confetti, setConfetti] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [filterOpen, setFilterOpen] = useState(true);
   const [fetchError, setFetchError] = useState<"empty" | "error" | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const prevLocationKeyRef = useRef<string | null>(null);
@@ -113,26 +114,31 @@ export default function HomePage() {
 
   if (screen === "result" && result) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px 16px",
-      }}>
+      <div
+        className="animate-fade-in"
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px 16px",
+        }}
+      >
         <Confetti active={confetti} />
         <div style={{ width: "100%", maxWidth: 430 }}>
           {/* Result header */}
-          <div className="animate-slide-up" style={{ textAlign: "center", marginBottom: 20 }}>
+          <div className="animate-fall-down" style={{ textAlign: "center", marginBottom: 20 }}>
             <div style={{ fontSize: 48, marginBottom: 4 }}>🎉</div>
             <h1 style={{ fontSize: 32, fontWeight: 900, color: "#E63946", letterSpacing: "-1px", marginBottom: 12 }}>
               Jom makan!
             </h1>
           </div>
 
-          <ResultCard restaurant={result} onTryAgain={handleTryAgain} />
+          <div className="animate-fall-down delay-100">
+            <ResultCard restaurant={result} onTryAgain={handleTryAgain} />
+          </div>
         </div>
 
         <p style={{ marginTop: 20, fontSize: 11, color: "#c9a882" }}>
@@ -200,15 +206,45 @@ export default function HomePage() {
           style={{
             background: "#fff",
             borderRadius: 20,
-            padding: "16px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
             border: "1px solid #f0e0cc",
+            overflow: "hidden",
           }}
         >
-          <p style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
-            Filter kedai 🔧
-          </p>
-          <FilterBar onRadiusChange={() => setFetchError(null)} />
+          {/* Collapsible header */}
+          <div
+            onClick={() => setFilterOpen(o => !o)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 16px",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Filter kedai 🔧
+            </span>
+            <span style={{
+              fontSize: 12,
+              color: "#b8845a",
+              display: "inline-block",
+              transform: filterOpen ? "rotate(0deg)" : "rotate(-90deg)",
+              transition: "transform 0.25s ease",
+            }}>▼</span>
+          </div>
+
+          {/* Collapsible body */}
+          <div style={{
+            maxHeight: filterOpen ? "200px" : "0px",
+            overflow: "hidden",
+            transition: "max-height 0.3s ease",
+          }}>
+            <div style={{ padding: "0 16px 14px" }}>
+              <FilterBar onRadiusChange={() => setFetchError(null)} />
+            </div>
+          </div>
         </div>
 
         {/* Spin wheel card */}

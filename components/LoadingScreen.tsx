@@ -1,6 +1,23 @@
 "use client";
+import { useEffect, useState } from "react";
+
+const PHASES: { after: number; msg: string }[] = [
+  { after: 0,  msg: "Looking for restaurants nearby..." },
+  { after: 3,  msg: "Reaching out to OpenStreetMap..." },
+  { after: 8,  msg: "OSM is taking its time — still waiting..." },
+  { after: 16, msg: "Nearly there, OSM can be slow sometimes 😅" },
+];
 
 export default function LoadingScreen() {
+  const [phaseIdx, setPhaseIdx] = useState(0);
+
+  useEffect(() => {
+    const timers = PHASES.slice(1).map((p, i) =>
+      setTimeout(() => setPhaseIdx(i + 1), p.after * 1000)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -16,9 +33,15 @@ export default function LoadingScreen() {
         <h2 style={{ fontSize: 22, fontWeight: 800, color: "#E63946", marginBottom: 8, letterSpacing: "-0.5px" }}>
           Cari kedai makan...
         </h2>
-        <p style={{ color: "#9a6b4b", fontSize: 14, marginBottom: 24 }}>
-          Tunggu jap, tengah fetch data OSM 🗺️
+
+        <p
+          key={phaseIdx}
+          className="animate-fade-in"
+          style={{ color: "#9a6b4b", fontSize: 12, marginBottom: 24, transition: "opacity 0.3s" }}
+        >
+          {PHASES[phaseIdx].msg}
         </p>
+
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           {[0, 1, 2, 3].map(i => (
             <div

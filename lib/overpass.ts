@@ -79,5 +79,5 @@ export async function fetchNearbyRestaurants(
       };
     })
     .sort((a: Restaurant, b: Restaurant) => a.distance - b.distance)
-    .slice(0, 50);
+    .slice(0, 25);
 }

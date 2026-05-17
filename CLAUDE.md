@@ -209,7 +209,7 @@ App mount
 - Queries `amenity=restaurant`, `amenity=fast_food`, `amenity=cafe`
 - Two endpoint fallbacks: `overpass-api.de` → `overpass.kumi.systems`
 - Timeout: 25s per endpoint
-- Results: filtered to named nodes, sorted by distance, capped at 35
+- Results: filtered to named nodes, sorted by distance, capped at 25
 - No API key needed
 
 ### Photon Geocoder (`lib/photon.ts`)
@@ -302,7 +302,7 @@ These need a database — out of scope until there are real users.
 - [ ] **PWA manifest** — add to home screen on mobile
 - [ ] **Shareable result URL** — `app/result/[id]/page.tsx` (encode restaurant in URL params)
 - [ ] **Re-fetch on radius change** — currently radius only applies to initial fetch, not filter
-- [ ] **Restaurant count badge on wheel** — show "35 kedai" inside wheel before spin
+- [ ] **Restaurant count badge on wheel** — show "25 kedai" inside wheel before spin
 
 ### Needs backend
 - [ ] **Group voting** — session code, weighted wheel slices, realtime (Pusher)

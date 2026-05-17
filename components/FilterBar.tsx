@@ -1,4 +1,5 @@
 "use client";
+import { useRef, useState } from "react";
 import { useAppStore, ALL_CATEGORIES } from "@/store/appStore";
 
 const RADIUS_OPTIONS: { value: number; label: string }[] = [
@@ -20,12 +21,49 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "Cafe / Drinks": "☕",
 };
 
+function fadeOverlay(side: "left" | "right", visible: boolean) {
+  return {
+    position: "absolute" as const,
+    [side]: 0,
+    top: 0,
+    bottom: 0,
+    width: 40,
+    background: side === "right"
+      ? "linear-gradient(to right, transparent, #fff)"
+      : "linear-gradient(to left, transparent, #fff)",
+    pointerEvents: "none" as const,
+    zIndex: 1,
+    opacity: visible ? 1 : 0,
+    transition: "opacity 0.2s ease",
+  };
+}
+
+function useScrollRow() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = useState(true);
+
+  function onScroll() {
+    setAtStart((ref.current?.scrollLeft ?? 0) < 4);
+  }
+
+  function onWheel(e: React.WheelEvent) {
+    if (!ref.current) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    ref.current.scrollLeft += e.deltaY;
+  }
+
+  return { ref, atStart, onScroll, onWheel };
+}
+
 interface FilterBarProps {
   onRadiusChange?: (r: number) => void;
 }
 
 export default function FilterBar({ onRadiusChange }: FilterBarProps) {
   const { selectedCategories, toggleCategory, radius, setRadius } = useAppStore();
+  const cats = useScrollRow();
+  const radii = useScrollRow();
 
   function handleRadius(r: number) {
     setRadius(r);
@@ -34,72 +72,111 @@ export default function FilterBar({ onRadiusChange }: FilterBarProps) {
 
   return (
     <div style={{ width: "100%" }}>
-      {/* Category chips */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
-        {ALL_CATEGORIES.map(cat => {
-          const active = selectedCategories.has(cat);
-          return (
-            <button
-              key={cat}
-              onClick={() => toggleCategory(cat)}
-              style={{
-                padding: "7px 14px",
-                borderRadius: 50,
-                border: active ? "2px solid #E63946" : "2px solid #e8d5c0",
-                background: active ? "linear-gradient(135deg, #E63946, #c1121f)" : "#fff",
-                color: active ? "#fff" : "#7a5a40",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                transition: "all 0.18s",
-                boxShadow: active ? "0 4px 12px rgba(230,57,70,0.3)" : "0 2px 6px rgba(0,0,0,0.06)",
-                transform: active ? "scale(1.04)" : "scale(1)",
-              }}
-            >
-              <span>{CATEGORY_EMOJI[cat]}</span>
-              {cat}
-            </button>
-          );
-        })}
+      {/* Category chips — horizontal scroll */}
+      <div style={{ position: "relative", marginBottom: 2 }}>
+        <div
+          ref={cats.ref}
+          onScroll={cats.onScroll}
+          onWheel={cats.onWheel}
+          className="hide-scrollbar"
+          style={{
+            display: "flex",
+            gap: 8,
+            overflowX: "auto",
+            paddingTop: 8,
+            paddingBottom: 8,
+            paddingLeft: 6,
+            paddingRight: 36,
+          }}
+        >
+          {ALL_CATEGORIES.map(cat => {
+            const active = selectedCategories.has(cat);
+            return (
+              <button
+                key={cat}
+                onClick={() => toggleCategory(cat)}
+                style={{
+                  flexShrink: 0,
+                  padding: "7px 14px",
+                  borderRadius: 50,
+                  border: active ? "2px solid #E63946" : "2px solid #e8d5c0",
+                  background: active ? "linear-gradient(135deg, #E63946, #c1121f)" : "#fff",
+                  color: active ? "#fff" : "#7a5a40",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  transition: "all 0.18s",
+                  boxShadow: active ? "0 2px 8px rgba(230,57,70,0.25)" : "0 2px 6px rgba(0,0,0,0.06)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>{CATEGORY_EMOJI[cat]}</span>
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+        <div style={fadeOverlay("left", !cats.atStart)} />
+        <div style={fadeOverlay("right", true)} />
       </div>
 
-      {/* Radius options — Jalan kaki je is just 800m in the same group */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {RADIUS_OPTIONS.map(opt => {
-          const active = radius === opt.value;
-          const isWalkable = opt.value === 800;
-          return (
-            <button
-              key={opt.value}
-              onClick={() => handleRadius(opt.value)}
-              style={{
-                padding: "7px 12px",
-                borderRadius: 50,
-                border: active
-                  ? `2px solid ${isWalkable ? "#F4A261" : "#E63946"}`
-                  : "2px solid #e8d5c0",
-                background: active
-                  ? isWalkable ? "linear-gradient(135deg, #F4A261, #e07b39)" : "#fff5f5"
-                  : "#fff",
-                color: active
-                  ? isWalkable ? "#fff" : "#E63946"
-                  : "#9a7a60",
-                fontSize: 11,
-                fontWeight: 700,
-                cursor: "pointer",
-                transition: "all 0.18s",
-                boxShadow: active
-                  ? isWalkable ? "0 4px 12px rgba(244,162,97,0.4)" : "0 2px 8px rgba(230,57,70,0.2)"
-                  : "none",
-              }}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
+      {/* Radius options — horizontal scroll */}
+      <div style={{ position: "relative" }}>
+        <div
+          ref={radii.ref}
+          onScroll={radii.onScroll}
+          onWheel={radii.onWheel}
+          className="hide-scrollbar"
+          style={{
+            display: "flex",
+            gap: 6,
+            overflowX: "auto",
+            paddingTop: 8,
+            paddingBottom: 8,
+            paddingLeft: 6,
+            paddingRight: 36,
+          }}
+        >
+          {RADIUS_OPTIONS.map(opt => {
+            const active = radius === opt.value;
+            const isWalkable = opt.value === 800;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => handleRadius(opt.value)}
+                style={{
+                  flexShrink: 0,
+                  padding: "7px 12px",
+                  borderRadius: 50,
+                  border: active
+                    ? `2px solid ${isWalkable ? "#F4A261" : "#E63946"}`
+                    : "2px solid #e8d5c0",
+                  background: active
+                    ? isWalkable ? "linear-gradient(135deg, #F4A261, #e07b39)" : "#fff5f5"
+                    : "#fff",
+                  color: active
+                    ? isWalkable ? "#fff" : "#E63946"
+                    : "#9a7a60",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.18s",
+                  whiteSpace: "nowrap",
+                  boxShadow: active
+                    ? isWalkable ? "0 4px 12px rgba(244,162,97,0.4)" : "0 2px 8px rgba(230,57,70,0.2)"
+                    : "none",
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <div style={fadeOverlay("left", !radii.atStart)} />
+        <div style={fadeOverlay("right", true)} />
       </div>
     </div>
   );

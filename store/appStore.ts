@@ -32,7 +32,7 @@ export const useAppStore = create<AppState>((set) => ({
   allRestaurants: [],
   selectedCategories: new Set(ALL_CATEGORIES),
   excludedIds: new Set<number>(),
-  radius: 1000,
+  radius: 800,
   result: null,
 
   setScreen: (screen) => set({ screen }),
@@ -61,7 +61,7 @@ export const useAppStore = create<AppState>((set) => ({
       allRestaurants: [],
       selectedCategories: new Set(ALL_CATEGORIES),
       excludedIds: new Set<number>(),
-      radius: 1000,
+      radius: 800,
       result: null,
     }),
 }));

@@ -15,6 +15,7 @@ interface SpinWheelProps {
 
 export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const arrowRef = useRef<SVGSVGElement>(null);
   const spinRef = useRef({ angle: 0, velocity: 0, spinning: false });
   const [isSpinning, setIsSpinning] = useState(false);
 
@@ -112,20 +113,6 @@ export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
     ctx.fillText("🎡", cx, cy);
     ctx.textBaseline = "alphabetic";
 
-    // Pointer (triangle on the right)
-    ctx.beginPath();
-    ctx.moveTo(cx + r + 2, cy);
-    ctx.lineTo(cx + r + 20, cy - 10);
-    ctx.lineTo(cx + r + 20, cy + 10);
-    ctx.closePath();
-    ctx.fillStyle = "#E63946";
-    ctx.shadowColor = "rgba(230,57,70,0.4)";
-    ctx.shadowBlur = 8;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
   }, [restaurants]);
 
   useEffect(() => {
@@ -140,14 +127,22 @@ export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
 
     function animate() {
       spinRef.current.angle += spinRef.current.velocity;
-      spinRef.current.velocity *= 0.984;
+      const friction = spinRef.current.velocity > 0.05 ? 0.983 : 0.994;
+      spinRef.current.velocity *= friction;
       draw(spinRef.current.angle);
+
+      // Slow the arrow wiggle animation to match wheel deceleration
+      if (arrowRef.current) {
+        const dur = Math.min(1.4, 0.018 / spinRef.current.velocity);
+        arrowRef.current.style.animationDuration = `${dur.toFixed(3)}s`;
+      }
 
       if (spinRef.current.velocity > 0.002) {
         requestAnimationFrame(animate);
       } else {
         spinRef.current.spinning = false;
         setIsSpinning(false);
+        if (arrowRef.current) arrowRef.current.style.animationDuration = "";
         const slice = (2 * Math.PI) / restaurants.length;
         const normalised =
           ((spinRef.current.angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
@@ -212,6 +207,29 @@ export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
           ref={canvasRef}
           style={{ display: "block", position: "relative", borderRadius: "50%" }}
         />
+
+        {/* Arrow pointer — outside canvas, animated */}
+        <svg
+          ref={arrowRef}
+          className={isSpinning ? "animate-arrow-spin" : "animate-arrow-bounce"}
+          style={{
+            position: "absolute",
+            right: -28,
+            top: "50%",
+            zIndex: 10,
+            filter: "drop-shadow(-3px 0 8px rgba(230,57,70,0.7))",
+            pointerEvents: "none",
+            overflow: "visible",
+          }}
+          width="34"
+          height="34"
+          viewBox="0 0 34 34"
+        >
+          {/* White outline (slightly larger, behind) */}
+          <polygon points="34,2 34,32 2,17" fill="white" />
+          {/* Red arrow */}
+          <polygon points="30,5 30,29 4,17" fill="#E63946" />
+        </svg>
       </div>
 
       {/* PUTAR button */}
