@@ -11,7 +11,7 @@ interface AppState {
   userLocation: UserLocation | null;
   allRestaurants: Restaurant[];
   selectedCategories: Set<FoodCategory>;
-  walkableOnly: boolean;
+  excludedIds: Set<number>;
   radius: number;
   result: Restaurant | null;
 
@@ -19,7 +19,7 @@ interface AppState {
   setLocation: (loc: UserLocation) => void;
   setRestaurants: (list: Restaurant[]) => void;
   toggleCategory: (cat: FoodCategory) => void;
-  setWalkableOnly: (v: boolean) => void;
+  toggleExclude: (id: number) => void;
   setRadius: (r: number) => void;
   setResult: (r: Restaurant | null) => void;
   reset: () => void;
@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>((set) => ({
   userLocation: null,
   allRestaurants: [],
   selectedCategories: new Set(ALL_CATEGORIES),
-  walkableOnly: false,
+  excludedIds: new Set<number>(),
   radius: 1000,
   result: null,
 
@@ -44,7 +44,12 @@ export const useAppStore = create<AppState>((set) => ({
       next.has(cat) ? next.delete(cat) : next.add(cat);
       return { selectedCategories: next };
     }),
-  setWalkableOnly: (walkableOnly) => set({ walkableOnly }),
+  toggleExclude: (id) =>
+    set((state) => {
+      const next = new Set(state.excludedIds);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return { excludedIds: next };
+    }),
   setRadius: (radius) => set({ radius }),
   setResult: (result) => set({ result }),
   reset: () =>
@@ -53,7 +58,7 @@ export const useAppStore = create<AppState>((set) => ({
       userLocation: null,
       allRestaurants: [],
       selectedCategories: new Set(ALL_CATEGORIES),
-      walkableOnly: false,
+      excludedIds: new Set<number>(),
       radius: 1000,
       result: null,
     }),

@@ -9,6 +9,7 @@ import FilterBar from "@/components/FilterBar";
 import SpinWheel from "@/components/SpinWheel";
 import ResultCard from "@/components/ResultCard";
 import Confetti from "@/components/Confetti";
+import RestaurantList from "@/components/RestaurantList";
 import type { Restaurant, UserLocation } from "@/types";
 
 export default function HomePage() {
@@ -16,11 +17,11 @@ export default function HomePage() {
     screen, setScreen,
     userLocation, setLocation,
     allRestaurants, setRestaurants,
-    selectedCategories, walkableOnly, radius,
+    selectedCategories, excludedIds, radius,
     result, setResult, reset,
   } = useAppStore();
 
-  const { location: gpsLocation, requestGPS } = useGeolocation();
+  const { location: gpsLocation, gpsBlocked, requestGPS } = useGeolocation();
   const [confetti, setConfetti] = useState(false);
 
   useEffect(() => {
@@ -28,10 +29,15 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gpsLocation]);
 
+  useEffect(() => {
+    if (gpsBlocked && !userLocation) setScreen("home");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gpsBlocked]);
+
   async function handleLocation(loc: UserLocation) {
     setLocation(loc);
     setScreen("loading");
-    const restaurants = await fetchNearbyRestaurants(loc.lat, loc.lng, radius);
+    const restaurants = await fetchNearbyRestaurants(loc.lat, loc.lng, 10000);
     setRestaurants(restaurants);
     setScreen("home");
   }
@@ -54,12 +60,19 @@ export default function HomePage() {
 
   const filteredRestaurants = allRestaurants.filter(r => {
     if (!selectedCategories.has(r.category)) return false;
-    if (walkableOnly && r.distance > 800) return false;
+    if (r.distance > radius) return false;
     return true;
   });
 
+  const wheelRestaurants = filteredRestaurants.filter(r => !excludedIds.has(r.id));
+
+  function handleGPS() {
+    setScreen("loading");
+    requestGPS();
+  }
+
   if (!userLocation && screen === "home") {
-    return <LocationScreen onLocation={handleLocation} onGPS={requestGPS} />;
+    return <LocationScreen onLocation={handleLocation} onGPS={handleGPS} />;
   }
 
   if (screen === "loading") {
@@ -177,8 +190,24 @@ export default function HomePage() {
             border: "1px solid #f0e0cc",
           }}
         >
-          <SpinWheel restaurants={filteredRestaurants} onResult={handleResult} />
+          <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} />
         </div>
+
+        {/* Restaurant list card */}
+        {filteredRestaurants.length > 0 && (
+          <div
+            className="animate-slide-up delay-300"
+            style={{
+              background: "#fff",
+              borderRadius: 20,
+              padding: "16px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+              border: "1px solid #f0e0cc",
+            }}
+          >
+            <RestaurantList restaurants={filteredRestaurants} />
+          </div>
+        )}
 
         <p style={{ textAlign: "center", fontSize: 11, color: "#c9a882" }}>
           © OpenStreetMap contributors · developed by yusairi yap

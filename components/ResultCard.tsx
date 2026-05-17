@@ -1,7 +1,9 @@
 "use client";
+import { useEffect, useState } from "react";
 import MapPreview from "./MapPreview";
 import { shareRestaurant } from "@/lib/shareUtils";
 import type { Restaurant } from "@/types";
+import type { Review } from "@/app/api/reviews/route";
 
 interface ResultCardProps {
   restaurant: Restaurant;
@@ -9,6 +11,20 @@ interface ResultCardProps {
 }
 
 export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) {
+  const [reviews, setReviews] = useState<Review[] | null>(null);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  useEffect(() => {
+    setReviews(null);
+    setReviewsLoading(true);
+    fetch(
+      `/api/reviews?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
+    )
+      .then((r) => r.json())
+      .then((data) => setReviews(data.reviews ?? []))
+      .catch(() => setReviews([]))
+      .finally(() => setReviewsLoading(false));
+  }, [restaurant.name, restaurant.lat, restaurant.lng]);
   const distLabel =
     restaurant.distance < 1000
       ? `${restaurant.distance}m away`
@@ -85,6 +101,66 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
       {/* Map */}
       <div style={{ padding: "16px 20px 0" }}>
         <MapPreview lat={restaurant.lat} lng={restaurant.lng} name={restaurant.name} />
+      </div>
+
+      {/* Reviews */}
+      <div style={{ padding: "16px 20px 0" }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
+          Google Reviews
+        </p>
+        {reviewsLoading && (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 0", color: "#c4a882", fontSize: 13 }}>
+            <span className="animate-spin-slow" style={{ display: "inline-block" }}>⏳</span>
+            Tengah cari reviews...
+          </div>
+        )}
+        {!reviewsLoading && reviews?.length === 0 && (
+          <p style={{ fontSize: 13, color: "#c4a882", padding: "4px 0" }}>
+            No reviews found — either no Google Places API key is set, or this place isn&apos;t on Google Maps.
+          </p>
+        )}
+        {!reviewsLoading && reviews && reviews.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {reviews.map((review, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "12px",
+                  background: "#FFF8F0",
+                  borderRadius: 12,
+                  border: "1px solid #f5e8d8",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  {review.photoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={review.photoUrl}
+                      alt={review.author}
+                      width={28}
+                      height={28}
+                      style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                    />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, fontSize: 12, color: "#3d2b1a", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {review.author}
+                    </p>
+                    <p style={{ fontSize: 11, color: "#9a7a60", margin: 0 }}>{review.time}</p>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#b07000", flexShrink: 0 }}>
+                    {"⭐".repeat(review.rating)}
+                  </span>
+                </div>
+                {review.text && (
+                  <p style={{ fontSize: 12, color: "#5a3d2b", margin: 0, lineHeight: 1.5 }}>
+                    {review.text.length > 200 ? review.text.slice(0, 200) + "…" : review.text}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

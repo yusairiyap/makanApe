@@ -8,6 +8,7 @@ const CITIES = [
   { label: "PJ", name: "Petaling Jaya", lat: 3.1073, lng: 101.6067, emoji: "🏘️" },
   { label: "Subang", name: "Subang Jaya", lat: 3.0456, lng: 101.5832, emoji: "🛍️" },
   { label: "Shah Alam", name: "Shah Alam", lat: 3.0733, lng: 101.5185, emoji: "🌿" },
+  { label: "i-City", name: "i-City Shah Alam", lat: 3.0804, lng: 101.5328, emoji: "🎡" },
   { label: "Cheras", name: "Cheras", lat: 3.0882, lng: 101.7332, emoji: "🍜" },
   { label: "Ampang", name: "Ampang", lat: 3.1478, lng: 101.7625, emoji: "🌆" },
   { label: "Bangsar", name: "Bangsar", lat: 3.1285, lng: 101.6741, emoji: "🍷" },
@@ -20,7 +21,6 @@ const CITIES = [
   { label: "Kuching", name: "Kuching", lat: 1.5497, lng: 110.3626, emoji: "🐱" },
   { label: "Alor Setar", name: "Alor Setar", lat: 6.1248, lng: 100.3673, emoji: "🌾" },
   { label: "Seremban", name: "Seremban", lat: 2.7297, lng: 101.9381, emoji: "🍖" },
-  { label: "KB", name: "Kota Bharu", lat: 6.1184, lng: 102.2384, emoji: "🎭" },
   { label: "Kuantan", name: "Kuantan", lat: 3.8077, lng: 103.326, emoji: "🏖️" },
 ];
 
