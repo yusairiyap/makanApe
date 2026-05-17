@@ -249,11 +249,11 @@ export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
           }
         }}
       >
-        {isSpinning ? "⏳ Putar..." : "🎡 PUTAR"}
+        {isSpinning ? "⏳ spinning..." : "🎡 lets gooooo!"}
       </button>
 
       <p style={{ color: "#c4a882", fontSize: 12, fontWeight: 500 }}>
-        Tap wheel or PUTAR to spin · {restaurants.length} kedai available
+        Tap wheel or the button to spin · {restaurants.length} kedai available
       </p>
     </div>
   );

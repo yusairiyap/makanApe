@@ -11,10 +11,8 @@ And yeah this is 100% vibe coded. Lets gooooooooooooo! 🚀
 1. 📍 Detects your location via GPS (or pick from 18 Malaysian cities)
 2. 🗺️ Fetches real nearby restaurants using OpenStreetMap data
 3. 🔍 Filter by food category, walkable distance, or radius
-4. 🎰 Tap **PUTAR** — the wheel spins and picks for you
+4. 🎰 Tap **lets gooooo!** — the wheel spins and picks for you
 5. 📤 Get a map, Waze/Google Maps link, and share the result
-
-No more "eh, up to you." The ape decides now.
 
 ## Running locally
 
