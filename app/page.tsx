@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { fetchNearbyRestaurants } from "@/lib/overpass";
@@ -18,11 +18,15 @@ export default function HomePage() {
     userLocation, setLocation,
     allRestaurants, setRestaurants,
     selectedCategories, excludedIds, radius,
-    result, setResult, reset,
+    result, setResult, reset, clearExcludes,
   } = useAppStore();
 
   const { location: gpsLocation, gpsBlocked, requestGPS } = useGeolocation();
   const [confetti, setConfetti] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [fetchError, setFetchError] = useState<"empty" | "error" | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const prevLocationKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (gpsLocation) handleLocation(gpsLocation);
@@ -34,12 +38,39 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gpsBlocked]);
 
-  async function handleLocation(loc: UserLocation) {
+  useEffect(() => {
+    if (!userLocation) return;
+
+    const locationKey = `${userLocation.lat},${userLocation.lng}`;
+    const isNewLocation = prevLocationKeyRef.current !== locationKey;
+    prevLocationKeyRef.current = locationKey;
+
+    if (isNewLocation) {
+      setScreen("loading");
+    } else {
+      setIsFetching(true);
+    }
+
+    setFetchError(null);
+    fetchNearbyRestaurants(userLocation.lat, userLocation.lng, radius)
+      .then((restaurants) => {
+        setRestaurants(restaurants);
+        clearExcludes();
+        setFetchError(restaurants.length === 0 ? "empty" : null);
+      })
+      .catch(() => {
+        setRestaurants([]);
+        setFetchError("error");
+      })
+      .finally(() => {
+        setIsFetching(false);
+        setScreen("home");
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLocation, radius, retryCount]);
+
+  function handleLocation(loc: UserLocation) {
     setLocation(loc);
-    setScreen("loading");
-    const restaurants = await fetchNearbyRestaurants(loc.lat, loc.lng, 10000);
-    setRestaurants(restaurants);
-    setScreen("home");
   }
 
   function handleResult(r: Restaurant) {
@@ -55,6 +86,7 @@ export default function HomePage() {
   }
 
   function handleChangeLocation() {
+    setFetchError(null);
     reset();
   }
 
@@ -176,7 +208,7 @@ export default function HomePage() {
           <p style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
             Filter kedai 🔧
           </p>
-          <FilterBar />
+          <FilterBar onRadiusChange={() => setFetchError(null)} />
         </div>
 
         {/* Spin wheel card */}
@@ -188,9 +220,63 @@ export default function HomePage() {
             padding: "24px 16px",
             boxShadow: "0 8px 32px rgba(230,57,70,0.1), 0 2px 12px rgba(0,0,0,0.06)",
             border: "1px solid #f0e0cc",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} />
+          {fetchError ? (
+            <div style={{ textAlign: "center", padding: "32px 16px" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>
+                {fetchError === "empty" ? "🍽️" : "📡"}
+              </div>
+              <p style={{ fontWeight: 800, fontSize: 16, color: "#3d2b1a", marginBottom: 6 }}>
+                {fetchError === "empty" ? "Takde kedai dijumpai" : "Gagal sambung ke Overpass"}
+              </p>
+              <p style={{ fontSize: 13, color: "#9a7a60", marginBottom: 20 }}>
+                {fetchError === "empty"
+                  ? "Cuba besarkan radius atau tukar kategori."
+                  : "Overpass API tak boleh dihubungi. Cuba lagi sekejap."}
+              </p>
+              <button
+                onClick={() => setRetryCount(c => c + 1)}
+                style={{
+                  padding: "12px 28px",
+                  background: "linear-gradient(135deg, #E63946, #c1121f)",
+                  color: "#fff",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  border: "none",
+                  borderRadius: 50,
+                  cursor: "pointer",
+                  boxShadow: "0 6px 18px rgba(230,57,70,0.35)",
+                }}
+              >
+                🔄 Cuba lagi
+              </button>
+            </div>
+          ) : (
+            <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} />
+          )}
+
+          {/* Inline loading overlay — only for radius/retry changes, not initial location load */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(255, 248, 240, 0.82)",
+            backdropFilter: "blur(3px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            borderRadius: 24,
+            opacity: isFetching ? 1 : 0,
+            pointerEvents: isFetching ? "auto" : "none",
+            transition: "opacity 0.3s ease",
+          }}>
+            <span className="animate-spin-slow" style={{ fontSize: 28, display: "inline-block" }}>🎡</span>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "#9a6b4b", margin: 0 }}>Mencari kedai...</p>
+          </div>
         </div>
 
         {/* Restaurant list card */}

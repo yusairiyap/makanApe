@@ -20,6 +20,7 @@ interface AppState {
   setRestaurants: (list: Restaurant[]) => void;
   toggleCategory: (cat: FoodCategory) => void;
   toggleExclude: (id: number) => void;
+  clearExcludes: () => void;
   setRadius: (r: number) => void;
   setResult: (r: Restaurant | null) => void;
   reset: () => void;
@@ -50,6 +51,7 @@ export const useAppStore = create<AppState>((set) => ({
       next.has(id) ? next.delete(id) : next.add(id);
       return { excludedIds: next };
     }),
+  clearExcludes: () => set({ excludedIds: new Set<number>() }),
   setRadius: (radius) => set({ radius }),
   setResult: (result) => set({ result }),
   reset: () =>

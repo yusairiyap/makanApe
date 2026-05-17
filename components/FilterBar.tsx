@@ -20,8 +20,17 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "Cafe / Drinks": "☕",
 };
 
-export default function FilterBar() {
+interface FilterBarProps {
+  onRadiusChange?: (r: number) => void;
+}
+
+export default function FilterBar({ onRadiusChange }: FilterBarProps) {
   const { selectedCategories, toggleCategory, radius, setRadius } = useAppStore();
+
+  function handleRadius(r: number) {
+    setRadius(r);
+    onRadiusChange?.(r);
+  }
 
   return (
     <div style={{ width: "100%" }}>
@@ -65,7 +74,7 @@ export default function FilterBar() {
           return (
             <button
               key={opt.value}
-              onClick={() => setRadius(opt.value)}
+              onClick={() => handleRadius(opt.value)}
               style={{
                 padding: "7px 12px",
                 borderRadius: 50,
