@@ -2,9 +2,7 @@
 
 > **"makan ape?"** — pasar Malay for *"what should we eat?"*
 
-Nobody can decide where to eat. So we built a wheel. You're welcome. 🤷
-
-And yeah this is 100% vibe coded. Lets gooooooooooooo! 🚀
+its a simple wheel app to find food and yeah its vibe coded lets gooooo 🚀
 
 ## What it does
 
