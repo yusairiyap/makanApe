@@ -8,15 +8,16 @@ const PHASES: { after: number; msg: string }[] = [
   { after: 16, msg: "Nearly there, OSM can be slow sometimes 😅" },
 ];
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | null }) {
   const [phaseIdx, setPhaseIdx] = useState(0);
 
   useEffect(() => {
+    if (cacheLabel) return;
     const timers = PHASES.slice(1).map((p, i) =>
       setTimeout(() => setPhaseIdx(i + 1), p.after * 1000)
     );
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [cacheLabel]);
 
   return (
     <div style={{
@@ -31,15 +32,15 @@ export default function LoadingScreen() {
           🎡
         </div>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: "#E63946", marginBottom: 8, letterSpacing: "-0.5px" }}>
-          Cari kedai makan...
+          {cacheLabel ? "Guna data tersimpan..." : "Cari kedai makan..."}
         </h2>
 
         <p
-          key={phaseIdx}
+          key={cacheLabel ?? phaseIdx}
           className="animate-fade-in"
           style={{ color: "#9a6b4b", fontSize: 12, marginBottom: 24, transition: "opacity 0.3s" }}
         >
-          {PHASES[phaseIdx].msg}
+          {cacheLabel ? `⚡ Memuat dari ${cacheLabel}` : PHASES[phaseIdx].msg}
         </p>
 
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
