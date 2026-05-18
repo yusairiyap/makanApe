@@ -17,7 +17,7 @@ export default function HomePage() {
     screen, setScreen,
     userLocation, setLocation,
     allRestaurants, setRestaurants,
-    selectedCategories, excludedIds, radius,
+    selectedCategories, specialFilters, excludedIds, radius,
     result, setResult, reset, clearExcludes,
   } = useAppStore();
 
@@ -94,6 +94,10 @@ export default function HomePage() {
   const filteredRestaurants = allRestaurants.filter(r => {
     if (!selectedCategories.has(r.category)) return false;
     if (r.distance > radius) return false;
+    if (specialFilters.size > 0) {
+      const nameLower = r.name.toLowerCase();
+      if (![...specialFilters].some(kw => nameLower.includes(kw))) return false;
+    }
     return true;
   });
 

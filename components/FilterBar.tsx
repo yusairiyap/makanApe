@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { useAppStore, ALL_CATEGORIES } from "@/store/appStore";
+import { useAppStore, ALL_CATEGORIES, SPECIAL_FILTERS } from "@/store/appStore";
 
 const RADIUS_OPTIONS: { value: number; label: string }[] = [
   { value: 800, label: "🚶 Jalan kaki" },
@@ -61,9 +61,10 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({ onRadiusChange }: FilterBarProps) {
-  const { selectedCategories, toggleCategory, radius, setRadius } = useAppStore();
+  const { selectedCategories, toggleCategory, specialFilters, toggleSpecialFilter, radius, setRadius } = useAppStore();
   const cats = useScrollRow();
   const radii = useScrollRow();
+  const specials = useScrollRow();
 
   function handleRadius(r: number) {
     setRadius(r);
@@ -176,6 +177,61 @@ export default function FilterBar({ onRadiusChange }: FilterBarProps) {
           })}
         </div>
         <div style={fadeOverlay("left", !radii.atStart)} />
+        <div style={fadeOverlay("right", true)} />
+      </div>
+
+      {/* Special keyword filters */}
+      <div style={{ position: "relative" }}>
+        <div
+          ref={specials.ref}
+          onScroll={specials.onScroll}
+          onWheel={specials.onWheel}
+          className="hide-scrollbar"
+          style={{
+            display: "flex",
+            gap: 6,
+            overflowX: "auto",
+            paddingTop: 6,
+            paddingBottom: 8,
+            paddingLeft: 6,
+            paddingRight: 36,
+            alignItems: "center",
+          }}
+        >
+          <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, color: "#b08060", letterSpacing: 0.5, paddingRight: 2 }}>
+            SPECIAL
+          </span>
+          {SPECIAL_FILTERS.map(sf => {
+            const active = specialFilters.has(sf.key);
+            return (
+              <button
+                key={sf.key}
+                onClick={() => toggleSpecialFilter(sf.key)}
+                style={{
+                  flexShrink: 0,
+                  padding: "6px 12px",
+                  borderRadius: 50,
+                  border: active ? "2px solid #F4A261" : "2px solid #e8d5c0",
+                  background: active ? "linear-gradient(135deg, #F4A261, #e07b39)" : "#fff",
+                  color: active ? "#fff" : "#9a7a60",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  transition: "all 0.18s",
+                  whiteSpace: "nowrap",
+                  boxShadow: active ? "0 4px 12px rgba(244,162,97,0.4)" : "0 2px 6px rgba(0,0,0,0.06)",
+                }}
+              >
+                <span>{sf.emoji}</span>
+                {sf.label}
+              </button>
+            );
+          })}
+        </div>
+        <div style={fadeOverlay("left", !specials.atStart)} />
         <div style={fadeOverlay("right", true)} />
       </div>
     </div>
