@@ -32,6 +32,7 @@ export default function HomePage() {
   const [isSpecialFetching, setIsSpecialFetching] = useState(false);
   const [cacheLabel, setCacheLabel] = useState<string | null>(null);
   const [usingCache, setUsingCache] = useState(false);
+  const [cacheTimestamp, setCacheTimestamp] = useState<number | null>(null);
   const prevLocationKeyRef = useRef<string | null>(null);
   const bypassCacheRef = useRef(false);
 
@@ -70,6 +71,7 @@ export default function HomePage() {
         clearExcludes();
         setFetchError(cached.restaurants.length === 0 ? "empty" : null);
         setUsingCache(true);
+        setCacheTimestamp(cached.timestamp);
         setCacheLabel(null);
         setIsFetching(false);
         setScreen("home");
@@ -79,6 +81,7 @@ export default function HomePage() {
 
     setCacheLabel(null);
     setUsingCache(false);
+    setCacheTimestamp(null);
     if (isNewLocation) {
       setScreen("loading");
     } else {
@@ -145,6 +148,7 @@ export default function HomePage() {
   function handleChangeLocation() {
     setFetchError(null);
     setUsingCache(false);
+    setCacheTimestamp(null);
     reset();
   }
 
@@ -325,7 +329,7 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} />
+            <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} cacheTimestamp={cacheTimestamp} />
           )}
 
           {/* Inline loading overlay — only for radius/retry changes, not initial location load */}

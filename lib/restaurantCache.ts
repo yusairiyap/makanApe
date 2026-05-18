@@ -11,7 +11,7 @@ interface CacheEntry {
 }
 
 const CACHE_KEY = "makanape_restaurants";
-const CACHE_TTL = 30 * 60 * 1000;
+const CACHE_TTL = 6 * 60 * 60 * 1000;
 
 export function saveRestaurantCache(
   lat: number,
@@ -30,7 +30,7 @@ export function getCachedRestaurants(
   lat: number,
   lng: number,
   radius: number
-): { restaurants: Restaurant[]; label: string } | null {
+): { restaurants: Restaurant[]; label: string; timestamp: number } | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -42,7 +42,7 @@ export function getCachedRestaurants(
     const restaurants = entry.restaurants
       .map(r => ({ ...r, distance: Math.round(haversineDistance(lat, lng, r.lat, r.lng)) }))
       .sort((a, b) => a.distance - b.distance);
-    return { restaurants, label: entry.label };
+    return { restaurants, label: entry.label, timestamp: entry.timestamp };
   } catch {
     return null;
   }

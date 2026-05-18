@@ -11,9 +11,10 @@ const SLICE_COLORS = [
 interface SpinWheelProps {
   restaurants: Restaurant[];
   onResult: (r: Restaurant) => void;
+  cacheTimestamp?: number | null;
 }
 
-export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
+export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: SpinWheelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const arrowRef = useRef<SVGSVGElement>(null);
   const spinRef = useRef({ angle: 0, velocity: 0, spinning: false });
@@ -273,6 +274,11 @@ export default function SpinWheel({ restaurants, onResult }: SpinWheelProps) {
       <p style={{ color: "#c4a882", fontSize: 12, fontWeight: 500 }}>
         Tap wheel or the button to spin · {restaurants.length} kedai available
       </p>
+      {cacheTimestamp && (
+        <p style={{ color: "#c4a882", fontSize: 11, marginTop: -12 }}>
+          ⚡ Data dari {new Date(cacheTimestamp).toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })}
+        </p>
+      )}
     </div>
   );
 }
