@@ -43,7 +43,7 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
         <div className="animate-shimmer" style={{ height: 36, borderRadius: 12, marginBottom: 10, ...shimmerStyle }} />
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 12, background: darkMode ? "#200900" : "#FFF8F0", border: `1px solid ${t.cardBorder}` }}>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 12, background: darkMode ? "#3a1a08" : "#FFF8F0", border: `1px solid ${t.cardBorder}` }}>
               <div className="animate-shimmer" style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0, ...shimmerStyle }} />
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 5 }}>
                 <div className="animate-shimmer" style={{ height: 12, borderRadius: 6, width: `${60 + (i % 3) * 15}%`, ...shimmerStyle }} />
@@ -87,7 +87,7 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
             padding: "9px 12px 9px 32px",
             borderRadius: 12,
             border: `1.5px solid ${t.cardBorder}`,
-            background: darkMode ? "#200900" : "#FFF8F0",
+            background: darkMode ? "#3a1a08" : "#FFF8F0",
             fontSize: 13,
             color: t.text,
             outline: "none",
@@ -134,8 +134,8 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
                 padding: "10px 12px",
                 borderRadius: 12,
                 background: excluded
-                  ? (darkMode ? "#160700" : "#f8f4f0")
-                  : (darkMode ? "#200900" : "#FFF8F0"),
+                  ? (darkMode ? "#260f04" : "#f8f4f0")
+                  : (darkMode ? "#3a1a08" : "#FFF8F0"),
                 border: `1px solid ${excluded ? t.cardBorder : (darkMode ? "#4a2e18" : "#f5e8d8")}`,
                 opacity: excluded ? 0.6 : 1,
                 transition: "all 0.18s",
@@ -164,8 +164,8 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
                   borderRadius: "50%",
                   border: "none",
                   background: excluded
-                    ? (darkMode ? "#2e1400" : "#e8ddd4")
-                    : (darkMode ? "#2a0800" : "#fde0e0"),
+                    ? (darkMode ? "#4a2010" : "#e8ddd4")
+                    : (darkMode ? "#3c1208" : "#fde0e0"),
                   color: excluded ? t.textMuted : "#E63946",
                   fontSize: 13,
                   fontWeight: 900,

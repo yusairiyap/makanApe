@@ -254,7 +254,7 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
         style={{
           padding: "15px 48px",
           background: isSpinning
-            ? (darkMode ? "linear-gradient(135deg, #2a1000, #1a0800)" : "linear-gradient(135deg, #ccc, #bbb)")
+            ? (darkMode ? "linear-gradient(135deg, #3e1a08, #2e1205)" : "linear-gradient(135deg, #ccc, #bbb)")
             : "linear-gradient(135deg, #E63946 0%, #c1121f 100%)",
           color: isSpinning ? (darkMode ? "#6a4a28" : "#fff") : "#fff",
           fontWeight: 900,

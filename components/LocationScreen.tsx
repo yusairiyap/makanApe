@@ -155,7 +155,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
             disabled={searching}
             style={{
               padding: "12px 18px",
-              background: searching ? (darkMode ? "#331500" : "#e0c9b0") : "linear-gradient(135deg, #F4A261, #e07b39)",
+              background: searching ? (darkMode ? "#4d2210" : "#e0c9b0") : "linear-gradient(135deg, #F4A261, #e07b39)",
               color: "#fff",
               fontWeight: 800,
               fontSize: 14,
@@ -174,7 +174,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
         {searchError && (
           <div className="animate-pop-in" style={{
             color: "#E63946", fontSize: 13, textAlign: "center",
-            background: darkMode ? "#200900" : "#fff0f0",
+            background: darkMode ? "#3e1a08" : "#fff0f0",
             padding: "10px 14px",
             borderRadius: 12, marginBottom: 12,
             border: "1px solid #ffc5c5",
@@ -212,7 +212,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLElement;
                   el.style.borderColor = "#E63946";
-                  el.style.background = darkMode ? "#200900" : "#fff5f5";
+                  el.style.background = darkMode ? "#3e1a08" : "#fff5f5";
                   el.style.transform = "translateY(-3px)";
                   el.style.boxShadow = "0 8px 20px rgba(230,57,70,0.18)";
                 }}

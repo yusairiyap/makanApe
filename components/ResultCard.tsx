@@ -81,7 +81,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
       {/* Badges */}
       <div style={{ padding: "16px 20px 0", display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
         {[
-          { icon: "🏷️", text: restaurant.category, bg: darkMode ? "#1e0c00" : "#fff5e6", color: "#c05c00" },
+          { icon: "🏷️", text: restaurant.category, bg: darkMode ? "#3a1a08" : "#fff5e6", color: "#c05c00" },
           { icon: "⭐", text: `${restaurant.rating}`, bg: darkMode ? "#2a2000" : "#fffbe6", color: "#b07000" },
           { icon: "📍", text: distLabel, bg: darkMode ? "#0a1f2e" : "#f0f9ff", color: darkMode ? "#60b8e0" : "#0369a1" },
           { icon: "💰", text: restaurant.priceRange, bg: darkMode ? "#0a2e14" : "#f0fdf4", color: darkMode ? "#4ade80" : "#166534" },
@@ -131,7 +131,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
                 key={i}
                 style={{
                   padding: "12px",
-                  background: darkMode ? "#200900" : "#FFF8F0",
+                  background: darkMode ? "#3a1a08" : "#FFF8F0",
                   borderRadius: 12,
                   border: `1px solid ${t.cardBorder}`,
                 }}
@@ -176,7 +176,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
             flex: 1,
             padding: "13px 0",
             border: "2px solid #E63946",
-            background: darkMode ? "#200900" : "#fff",
+            background: darkMode ? "#3a1a08" : "#fff",
             color: "#E63946",
             fontWeight: 800,
             fontSize: 14,
@@ -185,11 +185,11 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
             transition: "all 0.18s",
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = darkMode ? "#2a0a00" : "#fff5f5";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#4a2010" : "#fff5f5";
             (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = darkMode ? "#200900" : "#fff";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#3a1a08" : "#fff";
             (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
           }}
         >
@@ -240,16 +240,16 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
             fontWeight: 700,
             fontSize: 13,
             textDecoration: "none",
-            background: darkMode ? "#1a0900" : "#fff",
+            background: darkMode ? "#2e1508" : "#fff",
             transition: "all 0.18s",
             boxSizing: "border-box",
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = darkMode ? "#220c00" : "#fff5e6";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#3e1a08" : "#fff5e6";
             (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = darkMode ? "#1a0900" : "#fff";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#2e1508" : "#fff";
             (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
           }}
         >

@@ -53,10 +53,10 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
   const specials = useScrollRow();
 
   const fadeLeft = darkMode
-    ? "linear-gradient(to left, transparent, #1a0900)"
+    ? "linear-gradient(to left, transparent, #2e1508)"
     : "linear-gradient(to left, transparent, #fff)";
   const fadeRight = darkMode
-    ? "linear-gradient(to right, transparent, #1a0900)"
+    ? "linear-gradient(to right, transparent, #2e1508)"
     : "linear-gradient(to right, transparent, #fff)";
 
   function fadeOverlay(side: "left" | "right", visible: boolean) {
@@ -164,7 +164,7 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
                     ? `2px solid ${isWalkable ? "#F4A261" : "#E63946"}`
                     : `2px solid ${t.cardBorder}`,
                   background: active
-                    ? isWalkable ? "linear-gradient(135deg, #F4A261, #e07b39)" : (darkMode ? "#200900" : "#fff5f5")
+                    ? isWalkable ? "linear-gradient(135deg, #F4A261, #e07b39)" : (darkMode ? "#3e1a08" : "#fff5f5")
                     : t.chipBg,
                   color: active
                     ? isWalkable ? "#fff" : "#E63946"

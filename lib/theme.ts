@@ -17,18 +17,18 @@ export interface AppTheme {
 export function getTheme(dark: boolean): AppTheme {
   if (dark) return {
     pageBg: "linear-gradient(160deg, #0d0500 0%, #170900 60%, #200c02 100%)",
-    cardBg: "#1a0900",
-    cardBorder: "#331500",
-    inputBg: "#220c00",
-    inputBorder: "#42200a",
+    cardBg: "#2e1508",
+    cardBorder: "#4d2210",
+    inputBg: "#3a1a0a",
+    inputBorder: "#5a2e14",
     text: "#f0dcc8",
     textSub: "#c9a070",
     textMuted: "#6a4a28",
-    chipBg: "#220c00",
+    chipBg: "#3a1a0a",
     chipText: "#c9a070",
     spinnerOverlay: "rgba(13, 5, 0, 0.92)",
-    shimmerFrom: "#1a0900",
-    shimmerMid: "#280e02",
+    shimmerFrom: "#2e1508",
+    shimmerMid: "#3e1c0a",
   };
   return {
     pageBg: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
