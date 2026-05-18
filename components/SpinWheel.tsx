@@ -1,5 +1,13 @@
 "use client";
 import { useRef, useEffect, useCallback, useState } from "react";
+
+function relativeTime(ts: number): string {
+  const mins = Math.floor((Date.now() - ts) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  return hrs === 1 ? "1 hour ago" : `${hrs} hours ago`;
+}
 import type { Restaurant } from "@/types";
 
 const SLICE_COLORS = [
@@ -19,6 +27,14 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
   const arrowRef = useRef<SVGSVGElement>(null);
   const spinRef = useRef({ angle: 0, velocity: 0, spinning: false });
   const [isSpinning, setIsSpinning] = useState(false);
+  const [relTime, setRelTime] = useState(() => cacheTimestamp ? relativeTime(cacheTimestamp) : "");
+
+  useEffect(() => {
+    if (!cacheTimestamp) { setRelTime(""); return; }
+    setRelTime(relativeTime(cacheTimestamp));
+    const id = setInterval(() => setRelTime(relativeTime(cacheTimestamp)), 30000);
+    return () => clearInterval(id);
+  }, [cacheTimestamp]);
 
   const draw = useCallback((angle: number) => {
     const canvas = canvasRef.current;
@@ -274,9 +290,9 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
       <p style={{ color: "#c4a882", fontSize: 12, fontWeight: 500 }}>
         Tap wheel or the button to spin · {restaurants.length} kedai available
       </p>
-      {cacheTimestamp && (
+      {relTime && (
         <p style={{ color: "#c4a882", fontSize: 11, marginTop: -12 }}>
-          ⚡ Data dari {new Date(cacheTimestamp).toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })}
+          ⚡ Last updated {relTime}
         </p>
       )}
     </div>
