@@ -3,7 +3,6 @@ import type { DataProvider } from "@/types";
 
 interface ProviderSwitcherProps {
   preferred: DataProvider;
-  active: DataProvider;
   onChange: (p: DataProvider) => void;
   darkMode: boolean;
 }
@@ -16,12 +15,9 @@ const PROVIDERS: { key: DataProvider; label: string }[] = [
 
 export default function ProviderSwitcher({
   preferred,
-  active,
   onChange,
   darkMode,
 }: ProviderSwitcherProps) {
-  const fallbackOccurred = active !== preferred;
-
   return (
     <div
       style={{
@@ -45,8 +41,7 @@ export default function ProviderSwitcher({
         Data
       </span>
       {PROVIDERS.map(({ key, label }) => {
-        const isPreferred = key === preferred;
-        const isActive = key === active;
+        const isSelected = key === preferred;
         return (
           <div
             key={key}
@@ -54,7 +49,6 @@ export default function ProviderSwitcher({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 4,
               padding: "4px 12px",
               borderRadius: 50,
               cursor: "pointer",
@@ -62,38 +56,24 @@ export default function ProviderSwitcher({
               fontWeight: 700,
               transition: "all 0.18s",
               userSelect: "none",
-              background: isPreferred
+              background: isSelected
                 ? "linear-gradient(135deg, #E63946, #c1121f)"
                 : darkMode
                 ? "#2e1508"
                 : "#f5ede4",
-              color: isPreferred ? "#fff" : darkMode ? "#c09070" : "#8a5c38",
-              border: isPreferred
+              color: isSelected ? "#fff" : darkMode ? "#c09070" : "#8a5c38",
+              border: isSelected
                 ? "1.5px solid transparent"
                 : `1.5px solid ${darkMode ? "#4a2510" : "#e8d0b8"}`,
-              boxShadow: isPreferred
+              boxShadow: isSelected
                 ? "0 2px 8px rgba(230,57,70,0.28)"
                 : "none",
             }}
           >
             {label}
-            {isActive && fallbackOccurred && isPreferred === false && (
-              <span style={{ fontSize: 9, color: "#b8845a" }}>↩</span>
-            )}
           </div>
         );
       })}
-      {fallbackOccurred && (
-        <span
-          style={{
-            fontSize: 10,
-            color: darkMode ? "#a07858" : "#b8845a",
-            fontStyle: "italic",
-          }}
-        >
-          (fallback)
-        </span>
-      )}
     </div>
   );
 }

@@ -13,6 +13,13 @@ const SPECIAL_FILTERS: { key: string; label: string; emoji: string }[] = [
   { key: "matcha", label: "Matcha", emoji: "🍵" },
 ];
 
+export function loadSavedProvider(): DataProvider {
+  if (typeof window === "undefined") return "overpass";
+  const saved = localStorage.getItem("makanape-provider");
+  if (saved === "overpass" || saved === "geoapify" || saved === "tomtom") return saved;
+  return "overpass";
+}
+
 interface AppState {
   screen: AppScreen;
   userLocation: UserLocation | null;
@@ -26,7 +33,6 @@ interface AppState {
   result: Restaurant | null;
   darkMode: boolean;
   preferredProvider: DataProvider;
-  activeProvider: DataProvider;
 
   setScreen: (s: AppScreen) => void;
   setLocation: (loc: UserLocation) => void;
@@ -41,7 +47,6 @@ interface AppState {
   setRadius: (r: number) => void;
   setResult: (r: Restaurant | null) => void;
   setPreferredProvider: (p: DataProvider) => void;
-  setActiveProvider: (p: DataProvider) => void;
   reset: () => void;
   toggleDarkMode: () => void;
 }
@@ -59,7 +64,6 @@ export const useAppStore = create<AppState>((set) => ({
   result: null,
   darkMode: false,
   preferredProvider: "overpass",
-  activeProvider: "overpass",
 
   setScreen: (screen) => set({ screen }),
   setLocation: (userLocation) => set({ userLocation }),
@@ -95,12 +99,15 @@ export const useAppStore = create<AppState>((set) => ({
   excludeAll: (ids) => set({ excludedIds: new Set(ids) }),
   setRadius: (radius) => set({ radius }),
   setResult: (result) => set({ result }),
-  setPreferredProvider: (p) =>
+  setPreferredProvider: (p) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("makanape-provider", p);
+    }
     set((state) => ({
       preferredProvider: p,
       specialFilters: p !== "overpass" ? new Set<string>() : state.specialFilters,
-    })),
-  setActiveProvider: (activeProvider) => set({ activeProvider }),
+    }));
+  },
   reset: () =>
     set({
       screen: "home",
@@ -113,8 +120,7 @@ export const useAppStore = create<AppState>((set) => ({
       excludedIds: new Set<number>(),
       radius: 800,
       result: null,
-      preferredProvider: "overpass",
-      activeProvider: "overpass",
+      // preferredProvider intentionally kept
     }),
   toggleDarkMode: () =>
     set((state) => {

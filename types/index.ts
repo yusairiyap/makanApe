@@ -24,11 +24,6 @@ export interface Restaurant {
   provider?: DataProvider;
 }
 
-export interface ProviderResult {
-  restaurants: Restaurant[];
-  provider: DataProvider;
-}
-
 export interface UserLocation {
   lat: number;
   lng: number;

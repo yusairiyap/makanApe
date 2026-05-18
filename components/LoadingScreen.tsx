@@ -2,27 +2,45 @@
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { getTheme } from "@/lib/theme";
+import type { DataProvider } from "@/types";
 
-const PHASES: { after: number; msg: string }[] = [
-  { after: 0,  msg: "Looking for restaurants nearby..." },
-  { after: 3,  msg: "Reaching out to OpenStreetMap..." },
-  { after: 8,  msg: "OSM is taking its time — still waiting..." },
-  { after: 16, msg: "Nearly there, OSM can be slow sometimes 😅" },
-];
+const PHASES: Record<DataProvider, { after: number; msg: string }[]> = {
+  overpass: [
+    { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
+    { after: 3,  msg: "Tanya OpenStreetMap jap..." },
+    { after: 8,  msg: "OSM tu slow sikit, sabar ye... ☕" },
+    { after: 16, msg: "Alamak lama gila ni, almost done kot 😅" },
+  ],
+  geoapify: [
+    { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
+    { after: 3,  msg: "Tengah call Geoapify, jap ye..." },
+    { after: 8,  msg: "Entah kenapa lambat sikit hari ni... 🤔" },
+    { after: 16, msg: "Eh lagi jap ye, nak siap dah ni 😅" },
+  ],
+  tomtom: [
+    { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
+    { after: 3,  msg: "TomTom tengah kira route ke perut kita... 🗺️" },
+    { after: 8,  msg: "TomTom tu recalculating la pulak..." },
+    { after: 16, msg: "Lagi sikit je, jangan give up! 😅" },
+  ],
+};
 
 export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | null }) {
   const darkMode = useAppStore(s => s.darkMode);
+  const preferredProvider = useAppStore(s => s.preferredProvider);
   const t = getTheme(darkMode);
+  const phases = PHASES[preferredProvider];
 
   const [phaseIdx, setPhaseIdx] = useState(0);
 
   useEffect(() => {
     if (cacheLabel) return;
-    const timers = PHASES.slice(1).map((p, i) =>
+    setPhaseIdx(0);
+    const timers = phases.slice(1).map((p, i) =>
       setTimeout(() => setPhaseIdx(i + 1), p.after * 1000)
     );
     return () => timers.forEach(clearTimeout);
-  }, [cacheLabel]);
+  }, [cacheLabel, phases]);
 
   return (
     <div style={{
@@ -46,7 +64,7 @@ export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | nu
           className="animate-fade-in"
           style={{ color: t.textSub, fontSize: 12, marginBottom: 24, transition: "opacity 0.3s" }}
         >
-          {cacheLabel ? `⚡ Memuat dari ${cacheLabel}` : PHASES[phaseIdx].msg}
+          {cacheLabel ? `⚡ Memuat dari ${cacheLabel}` : phases[phaseIdx].msg}
         </p>
 
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
