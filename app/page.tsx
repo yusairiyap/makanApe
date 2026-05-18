@@ -335,13 +335,13 @@ export default function HomePage() {
             transition: "max-height 0.3s ease",
           }}>
             <div style={{ padding: "0 16px 14px" }}>
-              <FilterBar onRadiusChange={() => setFetchError(null)} />
+              <FilterBar onRadiusChange={() => setFetchError(null)} isLoading={isFetching || isSpecialFetching} />
             </div>
           </div>
         </div>
 
         {/* Restaurant list card */}
-        {(isFetching || isSpecialFetching || filteredRestaurants.length > 0) && (
+        {(
           <div
             className="animate-slide-up delay-400"
             style={{

@@ -102,11 +102,17 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
         )}
       </div>
 
-      {visible.length === 0 && (
+      {restaurants.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "24px 16px" }}>
+          <div style={{ fontSize: 40, marginBottom: 8 }}>🫙</div>
+          <p style={{ fontWeight: 700, fontSize: 13, color: "#9a7a60", margin: 0 }}>Takde kedai dalam wheel</p>
+          <p style={{ fontSize: 12, color: "#c4a882", margin: "4px 0 0" }}>Cuba tukar filter atau besarkan radius.</p>
+        </div>
+      ) : visible.length === 0 ? (
         <p style={{ textAlign: "center", color: "#c4a882", fontSize: 13, padding: "12px 0" }}>
           Takde kedai yang sepadan 🤷
         </p>
-      )}
+      ) : null}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {visible.map((r) => {
