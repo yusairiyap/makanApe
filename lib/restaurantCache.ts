@@ -40,7 +40,7 @@ export function getCachedRestaurants(
     const dist = haversineDistance(lat, lng, entry.lat, entry.lng);
     if (dist > entry.radius) return null;
     const restaurants = entry.restaurants
-      .map(r => ({ ...r, distance: haversineDistance(lat, lng, r.lat, r.lng) }))
+      .map(r => ({ ...r, distance: Math.round(haversineDistance(lat, lng, r.lat, r.lng)) }))
       .sort((a, b) => a.distance - b.distance);
     return { restaurants, label: entry.label };
   } catch {
