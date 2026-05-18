@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import MapPreview from "./MapPreview";
 import { shareRestaurant } from "@/lib/shareUtils";
+import { useAppStore } from "@/store/appStore";
+import { getTheme } from "@/lib/theme";
 import type { Restaurant } from "@/types";
 import type { Review } from "@/app/api/reviews/route";
 
@@ -11,6 +13,9 @@ interface ResultCardProps {
 }
 
 export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) {
+  const darkMode = useAppStore(s => s.darkMode);
+  const t = getTheme(darkMode);
+
   const [reviews, setReviews] = useState<Review[] | null>(null);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
@@ -25,6 +30,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
       .catch(() => setReviews([]))
       .finally(() => setReviewsLoading(false));
   }, [restaurant.name, restaurant.lat, restaurant.lng]);
+
   const distLabel =
     restaurant.distance < 1000
       ? `${restaurant.distance}m away`
@@ -33,7 +39,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
   return (
     <div className="animate-pop-in" style={{
       width: "100%",
-      background: "#fff",
+      background: t.cardBg,
       borderRadius: 28,
       overflow: "hidden",
       boxShadow: "0 20px 60px rgba(230,57,70,0.15), 0 4px 16px rgba(0,0,0,0.08)",
@@ -46,7 +52,6 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* Decorative circles */}
         <div style={{
           position: "absolute", top: -20, right: -20,
           width: 100, height: 100, borderRadius: "50%",
@@ -76,10 +81,10 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
       {/* Badges */}
       <div style={{ padding: "16px 20px 0", display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
         {[
-          { icon: "🏷️", text: restaurant.category, bg: "#fff5e6", color: "#c05c00" },
-          { icon: "⭐", text: `${restaurant.rating}`, bg: "#fffbe6", color: "#b07000" },
-          { icon: "📍", text: distLabel, bg: "#f0f9ff", color: "#0369a1" },
-          { icon: "💰", text: restaurant.priceRange, bg: "#f0fdf4", color: "#166534" },
+          { icon: "🏷️", text: restaurant.category, bg: darkMode ? "#3a1a08" : "#fff5e6", color: "#c05c00" },
+          { icon: "⭐", text: `${restaurant.rating}`, bg: darkMode ? "#2a2000" : "#fffbe6", color: "#b07000" },
+          { icon: "📍", text: distLabel, bg: darkMode ? "#0a1f2e" : "#f0f9ff", color: darkMode ? "#60b8e0" : "#0369a1" },
+          { icon: "💰", text: restaurant.priceRange, bg: darkMode ? "#0a2e14" : "#f0fdf4", color: darkMode ? "#4ade80" : "#166534" },
         ].map(badge => (
           <span key={badge.text} style={{
             display: "inline-flex",
@@ -109,13 +114,13 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
           Google Reviews
         </p>
         {reviewsLoading && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 0", color: "#c4a882", fontSize: 13 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 0", color: t.textMuted, fontSize: 13 }}>
             <span className="animate-spin-slow" style={{ display: "inline-block" }}>⏳</span>
             Tengah cari reviews...
           </div>
         )}
         {!reviewsLoading && reviews?.length === 0 && (
-          <p style={{ fontSize: 13, color: "#c4a882", padding: "4px 0" }}>
+          <p style={{ fontSize: 13, color: t.textMuted, padding: "4px 0" }}>
             No reviews found — either no Google Places API key is set, or this place isn&apos;t on Google Maps.
           </p>
         )}
@@ -126,9 +131,9 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
                 key={i}
                 style={{
                   padding: "12px",
-                  background: "#FFF8F0",
+                  background: darkMode ? "#3a1a08" : "#FFF8F0",
                   borderRadius: 12,
-                  border: "1px solid #f5e8d8",
+                  border: `1px solid ${t.cardBorder}`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -143,17 +148,17 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
                     />
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 700, fontSize: 12, color: "#3d2b1a", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontWeight: 700, fontSize: 12, color: t.text, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {review.author}
                     </p>
-                    <p style={{ fontSize: 11, color: "#9a7a60", margin: 0 }}>{review.time}</p>
+                    <p style={{ fontSize: 11, color: t.textMuted, margin: 0 }}>{review.time}</p>
                   </div>
                   <span style={{ fontSize: 12, fontWeight: 700, color: "#b07000", flexShrink: 0 }}>
                     {"⭐".repeat(review.rating)}
                   </span>
                 </div>
                 {review.text && (
-                  <p style={{ fontSize: 12, color: "#5a3d2b", margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 12, color: t.textSub, margin: 0, lineHeight: 1.5 }}>
                     {review.text.length > 200 ? review.text.slice(0, 200) + "…" : review.text}
                   </p>
                 )}
@@ -171,7 +176,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
             flex: 1,
             padding: "13px 0",
             border: "2px solid #E63946",
-            background: "#fff",
+            background: darkMode ? "#3a1a08" : "#fff",
             color: "#E63946",
             fontWeight: 800,
             fontSize: 14,
@@ -180,11 +185,11 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
             transition: "all 0.18s",
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = "#fff5f5";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#4a2010" : "#fff5f5";
             (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = "#fff";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#3a1a08" : "#fff";
             (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
           }}
         >
@@ -218,7 +223,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
         </button>
       </div>
 
-      {/* OSM contribution — improve existing listing */}
+      {/* OSM contribution */}
       <div style={{ padding: "0 20px 20px" }}>
         <a
           href={`https://www.openstreetmap.org/edit?node=${restaurant.id}`}
@@ -235,16 +240,16 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
             fontWeight: 700,
             fontSize: 13,
             textDecoration: "none",
-            background: "#fff",
+            background: darkMode ? "#2e1508" : "#fff",
             transition: "all 0.18s",
             boxSizing: "border-box",
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = "#fff5e6";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#3e1a08" : "#fff5e6";
             (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
           }}
           onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = "#fff";
+            (e.currentTarget as HTMLElement).style.background = darkMode ? "#2e1508" : "#fff";
             (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
           }}
         >

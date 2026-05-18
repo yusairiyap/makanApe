@@ -1,5 +1,7 @@
 "use client";
 import { useRef, useEffect, useCallback, useState } from "react";
+import { useAppStore } from "@/store/appStore";
+import { getTheme } from "@/lib/theme";
 
 function relativeTime(ts: number): string {
   const mins = Math.floor((Date.now() - ts) / 60000);
@@ -23,6 +25,9 @@ interface SpinWheelProps {
 }
 
 export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: SpinWheelProps) {
+  const darkMode = useAppStore(s => s.darkMode);
+  const t = getTheme(darkMode);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const arrowRef = useRef<SVGSVGElement>(null);
   const spinRef = useRef({ angle: 0, velocity: 0, spinning: false });
@@ -78,7 +83,6 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
       ctx.fillStyle = color;
       ctx.fill();
 
-      // Slice border
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.arc(cx, cy, r, start, end);
@@ -86,7 +90,6 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Label
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(start + slice / 2);
@@ -122,14 +125,12 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Center emoji
     ctx.shadowBlur = 0;
     ctx.font = "16px serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("🎡", cx, cy);
     ctx.textBaseline = "alphabetic";
-
   }, [restaurants]);
 
   useEffect(() => {
@@ -148,7 +149,6 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
       spinRef.current.velocity *= friction;
       draw(spinRef.current.angle);
 
-      // Slow the arrow wiggle animation to match wheel deceleration
       if (arrowRef.current) {
         const dur = Math.min(1.4, 0.018 / spinRef.current.velocity);
         arrowRef.current.style.animationDuration = `${dur.toFixed(3)}s`;
@@ -182,10 +182,10 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
         textAlign: "center",
       }}>
         <div style={{ fontSize: 56 }}>😢</div>
-        <p style={{ color: "#9a7a60", fontWeight: 600 }}>
+        <p style={{ color: t.textSub, fontWeight: 600 }}>
           Takde kedai dengan filter ni
         </p>
-        <p style={{ color: "#c4a882", fontSize: 13 }}>
+        <p style={{ color: t.textMuted, fontSize: 13 }}>
           Cuba ubah kategori atau jarakkan radius
         </p>
       </div>
@@ -225,7 +225,7 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
           style={{ display: "block", position: "relative", borderRadius: "50%" }}
         />
 
-        {/* Arrow pointer — outside canvas, animated */}
+        {/* Arrow pointer */}
         <svg
           ref={arrowRef}
           className={isSpinning ? "animate-arrow-spin" : "animate-arrow-bounce"}
@@ -242,9 +242,7 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
           height="34"
           viewBox="0 0 34 34"
         >
-          {/* White outline (slightly larger, behind) */}
           <polygon points="34,2 34,32 2,17" fill="white" />
-          {/* Red arrow */}
           <polygon points="30,5 30,29 4,17" fill="#E63946" />
         </svg>
       </div>
@@ -256,9 +254,9 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
         style={{
           padding: "15px 48px",
           background: isSpinning
-            ? "linear-gradient(135deg, #ccc, #bbb)"
+            ? (darkMode ? "linear-gradient(135deg, #3e1a08, #2e1205)" : "linear-gradient(135deg, #ccc, #bbb)")
             : "linear-gradient(135deg, #E63946 0%, #c1121f 100%)",
-          color: "#fff",
+          color: isSpinning ? (darkMode ? "#6a4a28" : "#fff") : "#fff",
           fontWeight: 900,
           fontSize: 20,
           border: "none",
@@ -287,11 +285,11 @@ export default function SpinWheel({ restaurants, onResult, cacheTimestamp }: Spi
         {isSpinning ? "⏳ spinning..." : "🎡 lets gooooo!"}
       </button>
 
-      <p style={{ color: "#c4a882", fontSize: 12, fontWeight: 500 }}>
+      <p style={{ color: t.textMuted, fontSize: 12, fontWeight: 500 }}>
         Tap wheel or the button to spin · {restaurants.length} kedai available
       </p>
       {relTime && (
-        <p style={{ color: "#c4a882", fontSize: 11, marginTop: -12 }}>
+        <p style={{ color: t.textMuted, fontSize: 11, marginTop: -12 }}>
           ⚡ Last updated {relTime}
         </p>
       )}

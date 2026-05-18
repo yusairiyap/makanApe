@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { geocodePlace } from "@/lib/photon";
+import { useAppStore } from "@/store/appStore";
+import { getTheme } from "@/lib/theme";
 import type { UserLocation } from "@/types";
 
 const CITIES = [
@@ -30,6 +32,9 @@ interface LocationScreenProps {
 }
 
 export default function LocationScreen({ onLocation, onGPS }: LocationScreenProps) {
+  const darkMode = useAppStore(s => s.darkMode);
+  const t = getTheme(darkMode);
+
   const [search, setSearch] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
@@ -50,7 +55,8 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
+      background: t.pageBg,
+      transition: "background 0.35s ease",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -69,7 +75,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
           }}>
             makan ape?
           </h1>
-          <p style={{ color: "#9a6b4b", fontSize: 15, fontWeight: 500 }}>
+          <p style={{ color: t.textSub, fontSize: 15, fontWeight: 500 }}>
             Tak tau nak makan apa? Let the wheel decide! 🎡
           </p>
         </div>
@@ -114,9 +120,9 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
 
         {/* Divider */}
         <div className="animate-slide-up delay-200" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, transparent, #e8c9a8)" }} />
+          <div style={{ flex: 1, height: 1, background: darkMode ? "linear-gradient(to right, transparent, #331500)" : "linear-gradient(to right, transparent, #e8c9a8)" }} />
           <span style={{ color: "#b8845a", fontSize: 12, fontWeight: 700, letterSpacing: "0.05em" }}>ATAU PILIH KAWASAN</span>
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, transparent, #e8c9a8)" }} />
+          <div style={{ flex: 1, height: 1, background: darkMode ? "linear-gradient(to left, transparent, #331500)" : "linear-gradient(to left, transparent, #e8c9a8)" }} />
         </div>
 
         {/* Search */}
@@ -129,9 +135,9 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
             placeholder="🔍  Cari kawasan... (e.g. Damansara)"
             style={{
               flex: 1, padding: "12px 16px",
-              border: "2px solid #f0d5b5", borderRadius: 14,
+              border: `2px solid ${t.inputBorder}`, borderRadius: 14,
               fontSize: 14, outline: "none",
-              background: "#fff", color: "#333",
+              background: t.inputBg, color: t.text,
               transition: "border-color 0.2s, box-shadow 0.2s",
               boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
             }}
@@ -140,7 +146,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
               e.currentTarget.style.boxShadow = "0 2px 12px rgba(230,57,70,0.15)";
             }}
             onBlur={e => {
-              e.currentTarget.style.borderColor = "#f0d5b5";
+              e.currentTarget.style.borderColor = t.inputBorder;
               e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
             }}
           />
@@ -149,7 +155,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
             disabled={searching}
             style={{
               padding: "12px 18px",
-              background: searching ? "#e0c9b0" : "linear-gradient(135deg, #F4A261, #e07b39)",
+              background: searching ? (darkMode ? "#4d2210" : "#e0c9b0") : "linear-gradient(135deg, #F4A261, #e07b39)",
               color: "#fff",
               fontWeight: 800,
               fontSize: 14,
@@ -168,7 +174,8 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
         {searchError && (
           <div className="animate-pop-in" style={{
             color: "#E63946", fontSize: 13, textAlign: "center",
-            background: "#fff0f0", padding: "10px 14px",
+            background: darkMode ? "#3e1a08" : "#fff0f0",
+            padding: "10px 14px",
             borderRadius: 12, marginBottom: 12,
             border: "1px solid #ffc5c5",
           }}>
@@ -191,8 +198,8 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
                 onClick={() => onLocation({ lat: city.lat, lng: city.lng, label: city.name })}
                 style={{
                   padding: "12px 6px",
-                  background: "#fff",
-                  border: "1.5px solid #f0d5b5",
+                  background: t.cardBg,
+                  border: `1.5px solid ${t.cardBorder}`,
                   borderRadius: 14,
                   cursor: "pointer",
                   display: "flex",
@@ -205,26 +212,26 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLElement;
                   el.style.borderColor = "#E63946";
-                  el.style.background = "#fff5f5";
+                  el.style.background = darkMode ? "#3e1a08" : "#fff5f5";
                   el.style.transform = "translateY(-3px)";
                   el.style.boxShadow = "0 8px 20px rgba(230,57,70,0.18)";
                 }}
                 onMouseLeave={e => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.borderColor = "#f0d5b5";
-                  el.style.background = "#fff";
+                  el.style.borderColor = t.cardBorder;
+                  el.style.background = t.cardBg;
                   el.style.transform = "translateY(0)";
                   el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
                 }}
               >
                 <span style={{ fontSize: 22 }}>{city.emoji}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#5a3e28" }}>{city.label}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: t.textSub }}>{city.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: "#c9a882", marginTop: 20 }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: t.textMuted, marginTop: 20 }}>
           © OpenStreetMap contributors · developed by yusairi yap
         </p>
       </div>

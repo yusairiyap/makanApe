@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useAppStore } from "@/store/appStore";
+import { getTheme } from "@/lib/theme";
 
 const PHASES: { after: number; msg: string }[] = [
   { after: 0,  msg: "Looking for restaurants nearby..." },
@@ -9,6 +11,9 @@ const PHASES: { after: number; msg: string }[] = [
 ];
 
 export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | null }) {
+  const darkMode = useAppStore(s => s.darkMode);
+  const t = getTheme(darkMode);
+
   const [phaseIdx, setPhaseIdx] = useState(0);
 
   useEffect(() => {
@@ -22,7 +27,8 @@ export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | nu
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
+      background: t.pageBg,
+      transition: "background 0.35s ease",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -38,7 +44,7 @@ export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | nu
         <p
           key={cacheLabel ?? phaseIdx}
           className="animate-fade-in"
-          style={{ color: "#9a6b4b", fontSize: 12, marginBottom: 24, transition: "opacity 0.3s" }}
+          style={{ color: t.textSub, fontSize: 12, marginBottom: 24, transition: "opacity 0.3s" }}
         >
           {cacheLabel ? `⚡ Memuat dari ${cacheLabel}` : PHASES[phaseIdx].msg}
         </p>
