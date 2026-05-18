@@ -223,39 +223,41 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
         </button>
       </div>
 
-      {/* OSM contribution */}
-      <div style={{ padding: "0 20px 20px" }}>
-        <a
-          href={`https://www.openstreetmap.org/edit?node=${restaurant.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "11px 0",
-            textAlign: "center",
-            border: "1.5px solid #F4A261",
-            borderRadius: 16,
-            color: "#c05c00",
-            fontWeight: 700,
-            fontSize: 13,
-            textDecoration: "none",
-            background: darkMode ? "#2e1508" : "#fff",
-            transition: "all 0.18s",
-            boxSizing: "border-box",
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = darkMode ? "#3e1a08" : "#fff5e6";
-            (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.background = darkMode ? "#2e1508" : "#fff";
-            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-          }}
-        >
-          ✏️ Improve this listing on OpenStreetMap
-        </a>
-      </div>
+      {/* OSM contribution — only for Overpass-sourced results */}
+      {(restaurant.provider === undefined || restaurant.provider === "overpass") && (
+        <div style={{ padding: "0 20px 20px" }}>
+          <a
+            href={`https://www.openstreetmap.org/edit?node=${restaurant.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "11px 0",
+              textAlign: "center",
+              border: "1.5px solid #F4A261",
+              borderRadius: 16,
+              color: "#c05c00",
+              fontWeight: 700,
+              fontSize: 13,
+              textDecoration: "none",
+              background: darkMode ? "#2e1508" : "#fff",
+              transition: "all 0.18s",
+              boxSizing: "border-box",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = darkMode ? "#3e1a08" : "#fff5e6";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = darkMode ? "#2e1508" : "#fff";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+            }}
+          >
+            ✏️ Improve this listing on OpenStreetMap
+          </a>
+        </div>
+      )}
     </div>
   );
 }

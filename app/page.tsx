@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { fetchNearbyRestaurants, fetchRestaurantsByKeyword } from "@/lib/overpass";
+import { fetchRestaurantsWithFallback } from "@/lib/providers";
+import { fetchRestaurantsByKeyword } from "@/lib/overpass";
 import { getTheme } from "@/lib/theme";
 import LocationScreen from "@/components/LocationScreen";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -11,8 +12,9 @@ import SpinWheel from "@/components/SpinWheel";
 import ResultCard from "@/components/ResultCard";
 import Confetti from "@/components/Confetti";
 import RestaurantList from "@/components/RestaurantList";
+import ProviderSwitcher from "@/components/ProviderSwitcher";
 import { saveRestaurantCache, getCachedRestaurants } from "@/lib/restaurantCache";
-import type { Restaurant, UserLocation } from "@/types";
+import type { Restaurant, UserLocation, DataProvider } from "@/types";
 
 export default function HomePage() {
   const {
@@ -23,6 +25,8 @@ export default function HomePage() {
     selectedCategories, selectedPrices, specialFilters, excludedIds, radius,
     result, setResult, reset, clearExcludes,
     darkMode, toggleDarkMode,
+    preferredProvider, setPreferredProvider,
+    activeProvider, setActiveProvider,
   } = useAppStore();
 
   const t = getTheme(darkMode);
@@ -104,8 +108,9 @@ export default function HomePage() {
       setIsFetching(true);
     }
 
-    fetchNearbyRestaurants(userLocation.lat, userLocation.lng, radius)
-      .then((restaurants) => {
+    fetchRestaurantsWithFallback(userLocation.lat, userLocation.lng, radius, preferredProvider)
+      .then(({ restaurants, provider }) => {
+        setActiveProvider(provider);
         setRestaurants(restaurants);
         clearExcludes();
         setFetchError(restaurants.length === 0 ? "empty" : null);
@@ -122,9 +127,13 @@ export default function HomePage() {
         setScreen("home");
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userLocation, radius, retryCount]);
+  }, [userLocation, radius, retryCount, preferredProvider]);
 
   useEffect(() => {
+    if (activeProvider !== "overpass") {
+      setSpecialRestaurants([]);
+      return;
+    }
     if (!userLocation || specialFilters.size === 0) {
       setSpecialRestaurants([]);
       return;
@@ -342,6 +351,15 @@ export default function HomePage() {
               )}
             </div>
           </div>
+          <ProviderSwitcher
+            preferred={preferredProvider}
+            active={activeProvider}
+            onChange={(p: DataProvider) => {
+              bypassCacheRef.current = true;
+              setPreferredProvider(p);
+            }}
+            darkMode={darkMode}
+          />
         </div>
 
         {/* Spin wheel card */}
@@ -363,12 +381,12 @@ export default function HomePage() {
                 {fetchError === "empty" ? "🍽️" : "📡"}
               </div>
               <p style={{ fontWeight: 800, fontSize: 16, color: t.text, marginBottom: 6 }}>
-                {fetchError === "empty" ? "Takde kedai dijumpai" : "Gagal sambung ke Overpass"}
+                {fetchError === "empty" ? "Takde kedai dijumpai" : `Gagal sambung ke ${activeProvider === "overpass" ? "Overpass" : activeProvider === "geoapify" ? "Geoapify" : "TomTom"}`}
               </p>
               <p style={{ fontSize: 13, color: t.textSub, marginBottom: 20 }}>
                 {fetchError === "empty"
                   ? "Cuba besarkan radius atau tukar kategori."
-                  : "Overpass API tak boleh dihubungi. Cuba lagi sekejap."}
+                  : "Pelayan data tak boleh dihubungi. Cuba lagi sekejap."}
               </p>
               <button
                 onClick={() => setRetryCount(c => c + 1)}
@@ -474,8 +492,8 @@ export default function HomePage() {
           />
         </div>
 
-        {/* OSM contribution */}
-        {userLocation && (
+        {/* OSM contribution — only when using Overpass */}
+        {userLocation && activeProvider === "overpass" && (
           <div style={{ textAlign: "center" }}>
             <a
               href={`https://www.openstreetmap.org/edit#map=19/${userLocation.lat}/${userLocation.lng}`}

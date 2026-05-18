@@ -7,6 +7,8 @@ export type FoodCategory =
   | "Fast Food"
   | "Cafe / Drinks";
 
+export type DataProvider = "overpass" | "geoapify" | "tomtom";
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -19,6 +21,12 @@ export interface Restaurant {
   emoji: string;
   priceRange: "💰" | "💰💰" | "💰💰💰";
   openNow: boolean | null;
+  provider?: DataProvider;
+}
+
+export interface ProviderResult {
+  restaurants: Restaurant[];
+  provider: DataProvider;
 }
 
 export interface UserLocation {
