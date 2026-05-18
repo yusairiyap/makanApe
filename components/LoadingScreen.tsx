@@ -13,7 +13,7 @@ const PHASES: Record<DataProvider, { after: number; msg: string }[]> = {
   ],
   geoapify: [
     { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
-    { after: 3,  msg: "Geoapify tengah kita tanya ni..." },
+    { after: 3,  msg: "Tengah call Geoapify, jap ye..." },
     { after: 8,  msg: "Entah kenapa lambat sikit hari ni... 🤔" },
     { after: 16, msg: "Eh lagi jap ye, nak siap dah ni 😅" },
   ],
