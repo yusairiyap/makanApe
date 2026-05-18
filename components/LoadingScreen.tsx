@@ -28,6 +28,7 @@ export default function LoadingScreen({ cacheLabel }: { cacheLabel?: string | nu
     <div style={{
       minHeight: "100vh",
       background: t.pageBg,
+      transition: "background 0.35s ease",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",

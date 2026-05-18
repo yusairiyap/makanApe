@@ -16,19 +16,19 @@ export interface AppTheme {
 
 export function getTheme(dark: boolean): AppTheme {
   if (dark) return {
-    pageBg: "linear-gradient(160deg, #1a0d05 0%, #251507 60%, #2e1a08 100%)",
-    cardBg: "#2a1508",
-    cardBorder: "#4a2e18",
-    inputBg: "#351a08",
-    inputBorder: "#5a3a22",
+    pageBg: "linear-gradient(160deg, #0d0500 0%, #170900 60%, #200c02 100%)",
+    cardBg: "#1a0900",
+    cardBorder: "#331500",
+    inputBg: "#220c00",
+    inputBorder: "#42200a",
     text: "#f0dcc8",
     textSub: "#c9a070",
-    textMuted: "#7a5a3a",
-    chipBg: "#351a08",
+    textMuted: "#6a4a28",
+    chipBg: "#220c00",
     chipText: "#c9a070",
-    spinnerOverlay: "rgba(26, 13, 5, 0.88)",
-    shimmerFrom: "#2a1508",
-    shimmerMid: "#3a1f0a",
+    spinnerOverlay: "rgba(13, 5, 0, 0.92)",
+    shimmerFrom: "#1a0900",
+    shimmerMid: "#280e02",
   };
   return {
     pageBg: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",

@@ -48,7 +48,8 @@ export default function HomePage() {
 
   // Keep body background in sync with dark mode
   useEffect(() => {
-    document.body.style.background = darkMode ? "#1a0d05" : "#FFF8F0";
+    document.body.style.transition = "background 0.35s ease";
+    document.body.style.background = darkMode ? "#0d0500" : "#FFF8F0";
   }, [darkMode]);
 
   useEffect(() => {
@@ -236,6 +237,7 @@ export default function HomePage() {
         style={{
           minHeight: "100vh",
           background: t.pageBg,
+          transition: "background 0.35s ease",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -269,6 +271,7 @@ export default function HomePage() {
     <div style={{
       minHeight: "100vh",
       background: t.pageBg,
+      transition: "background 0.35s ease",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
