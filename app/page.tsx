@@ -10,6 +10,7 @@ import SpinWheel from "@/components/SpinWheel";
 import ResultCard from "@/components/ResultCard";
 import Confetti from "@/components/Confetti";
 import RestaurantList from "@/components/RestaurantList";
+import { saveRestaurantCache, getCachedRestaurants } from "@/lib/restaurantCache";
 import type { Restaurant, UserLocation } from "@/types";
 
 export default function HomePage() {
@@ -29,7 +30,10 @@ export default function HomePage() {
   const [fetchError, setFetchError] = useState<"empty" | "error" | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [isSpecialFetching, setIsSpecialFetching] = useState(false);
+  const [cacheLabel, setCacheLabel] = useState<string | null>(null);
+  const [usingCache, setUsingCache] = useState(false);
   const prevLocationKeyRef = useRef<string | null>(null);
+  const bypassCacheRef = useRef(false);
 
   useEffect(() => {
     if (gpsLocation) handleLocation(gpsLocation);
@@ -48,18 +52,47 @@ export default function HomePage() {
     const isNewLocation = prevLocationKeyRef.current !== locationKey;
     prevLocationKeyRef.current = locationKey;
 
+    const skipCache = bypassCacheRef.current;
+    bypassCacheRef.current = false;
+
+    setFetchError(null);
+
+    const cached = skipCache ? null : getCachedRestaurants(userLocation.lat, userLocation.lng, radius);
+    if (cached) {
+      setCacheLabel(cached.label);
+      if (isNewLocation) {
+        setScreen("loading");
+      } else {
+        setIsFetching(true);
+      }
+      setTimeout(() => {
+        setRestaurants(cached.restaurants);
+        clearExcludes();
+        setFetchError(cached.restaurants.length === 0 ? "empty" : null);
+        setUsingCache(true);
+        setCacheLabel(null);
+        setIsFetching(false);
+        setScreen("home");
+      }, 700);
+      return;
+    }
+
+    setCacheLabel(null);
+    setUsingCache(false);
     if (isNewLocation) {
       setScreen("loading");
     } else {
       setIsFetching(true);
     }
 
-    setFetchError(null);
     fetchNearbyRestaurants(userLocation.lat, userLocation.lng, radius)
       .then((restaurants) => {
         setRestaurants(restaurants);
         clearExcludes();
         setFetchError(restaurants.length === 0 ? "empty" : null);
+        if (restaurants.length > 0) {
+          saveRestaurantCache(userLocation.lat, userLocation.lng, radius, userLocation.label, restaurants);
+        }
       })
       .catch(() => {
         setRestaurants([]);
@@ -111,6 +144,7 @@ export default function HomePage() {
 
   function handleChangeLocation() {
     setFetchError(null);
+    setUsingCache(false);
     reset();
   }
 
@@ -134,7 +168,7 @@ export default function HomePage() {
   }
 
   if (screen === "loading") {
-    return <LoadingScreen />;
+    return <LoadingScreen cacheLabel={cacheLabel} />;
   }
 
   if (screen === "result" && result) {
@@ -222,6 +256,31 @@ export default function HomePage() {
             >
               ✏️ Tukar kawasan
             </button>
+            {usingCache && (
+              <button
+                onClick={() => {
+                  setUsingCache(false);
+                  bypassCacheRef.current = true;
+                  setRetryCount(c => c + 1);
+                }}
+                style={{
+                  padding: "6px 14px", background: "#fff", border: "1.5px solid #f0d5b5",
+                  borderRadius: 50, fontSize: 12, fontWeight: 700, color: "#9a6b4b",
+                  cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  transition: "all 0.18s",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "#F4A261";
+                  (e.currentTarget as HTMLElement).style.color = "#c47a35";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "#f0d5b5";
+                  (e.currentTarget as HTMLElement).style.color = "#9a6b4b";
+                }}
+              >
+                🔄 Ambil data baru
+              </button>
+            )}
           </div>
         </div>
 
