@@ -90,6 +90,12 @@
 }
 .animate-fall-down { animation: fall-down 0.52s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+.animate-shimmer {
+  background: linear-gradient(90deg, #f5e8d8 25%, #fdebd0 50%, #f5e8d8 75%);
+  background-size: 200% auto;
+  animation: shimmer 1.4s linear infinite;
+}
+
 .animate-float { animation: float 3s ease-in-out infinite; }
 .animate-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
 .animate-slide-up { animation: slide-up 0.4s ease-out both; }

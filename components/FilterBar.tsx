@@ -58,9 +58,10 @@ function useScrollRow() {
 
 interface FilterBarProps {
   onRadiusChange?: (r: number) => void;
+  isLoading?: boolean;
 }
 
-export default function FilterBar({ onRadiusChange }: FilterBarProps) {
+export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps) {
   const { selectedCategories, toggleCategory, specialFilters, toggleSpecialFilter, radius, setRadius } = useAppStore();
   const cats = useScrollRow();
   const radii = useScrollRow();
@@ -72,7 +73,7 @@ export default function FilterBar({ onRadiusChange }: FilterBarProps) {
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%", pointerEvents: isLoading ? "none" : "auto", opacity: isLoading ? 0.45 : 1, transition: "opacity 0.25s ease" }}>
       {/* Category chips — horizontal scroll */}
       <div style={{ position: "relative", marginBottom: 2 }}>
         <div

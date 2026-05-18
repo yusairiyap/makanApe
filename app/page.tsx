@@ -225,56 +225,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Filter card */}
-        <div
-          className="animate-slide-up delay-100"
-          style={{
-            background: "#fff",
-            borderRadius: 20,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
-            border: "1px solid #f0e0cc",
-            overflow: "hidden",
-          }}
-        >
-          {/* Collapsible header */}
-          <div
-            onClick={() => setFilterOpen(o => !o)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "14px 16px",
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-          >
-            <span style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              Filter kedai 🔧
-            </span>
-            <span style={{
-              fontSize: 12,
-              color: "#b8845a",
-              display: "inline-block",
-              transform: filterOpen ? "rotate(0deg)" : "rotate(-90deg)",
-              transition: "transform 0.25s ease",
-            }}>▼</span>
-          </div>
-
-          {/* Collapsible body */}
-          <div style={{
-            maxHeight: filterOpen ? "200px" : "0px",
-            overflow: "hidden",
-            transition: "max-height 0.3s ease",
-          }}>
-            <div style={{ padding: "0 16px 14px" }}>
-              <FilterBar onRadiusChange={() => setFetchError(null)} />
-            </div>
-          </div>
-        </div>
-
         {/* Spin wheel card */}
         <div
-          className="animate-slide-up delay-200"
+          className="animate-slide-up delay-100"
           style={{
             background: "#fff",
             borderRadius: 24,
@@ -340,10 +293,57 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Restaurant list card */}
-        {filteredRestaurants.length > 0 && (
+        {/* Filter card */}
+        <div
+          className="animate-slide-up delay-200"
+          style={{
+            background: "#fff",
+            borderRadius: 20,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+            border: "1px solid #f0e0cc",
+            overflow: "hidden",
+          }}
+        >
+          {/* Collapsible header */}
           <div
-            className="animate-slide-up delay-300"
+            onClick={() => setFilterOpen(o => !o)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 16px",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Filter kedai 🔧
+            </span>
+            <span style={{
+              fontSize: 12,
+              color: "#b8845a",
+              display: "inline-block",
+              transform: filterOpen ? "rotate(0deg)" : "rotate(-90deg)",
+              transition: "transform 0.25s ease",
+            }}>▼</span>
+          </div>
+
+          {/* Collapsible body */}
+          <div style={{
+            maxHeight: filterOpen ? "200px" : "0px",
+            overflow: "hidden",
+            transition: "max-height 0.3s ease",
+          }}>
+            <div style={{ padding: "0 16px 14px" }}>
+              <FilterBar onRadiusChange={() => setFetchError(null)} isLoading={isFetching || isSpecialFetching} />
+            </div>
+          </div>
+        </div>
+
+        {/* Restaurant list card */}
+        {(
+          <div
+            className="animate-slide-up delay-400"
             style={{
               background: "#fff",
               borderRadius: 20,
@@ -352,7 +352,10 @@ export default function HomePage() {
               border: "1px solid #f0e0cc",
             }}
           >
-            <RestaurantList restaurants={filteredRestaurants} />
+            <RestaurantList
+              restaurants={filteredRestaurants}
+              isLoading={isFetching || isSpecialFetching}
+            />
           </div>
         )}
 
