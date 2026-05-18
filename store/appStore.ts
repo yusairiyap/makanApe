@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Restaurant, UserLocation, FoodCategory, AppScreen } from "@/types";
+import type { Restaurant, UserLocation, FoodCategory, AppScreen, DataProvider } from "@/types";
 
 const ALL_CATEGORIES: FoodCategory[] = [
   "Local / Malay", "Chinese", "Indian", "Western",
@@ -25,6 +25,8 @@ interface AppState {
   radius: number;
   result: Restaurant | null;
   darkMode: boolean;
+  preferredProvider: DataProvider;
+  activeProvider: DataProvider;
 
   setScreen: (s: AppScreen) => void;
   setLocation: (loc: UserLocation) => void;
@@ -38,6 +40,8 @@ interface AppState {
   excludeAll: (ids: number[]) => void;
   setRadius: (r: number) => void;
   setResult: (r: Restaurant | null) => void;
+  setPreferredProvider: (p: DataProvider) => void;
+  setActiveProvider: (p: DataProvider) => void;
   reset: () => void;
   toggleDarkMode: () => void;
 }
@@ -54,6 +58,8 @@ export const useAppStore = create<AppState>((set) => ({
   radius: 800,
   result: null,
   darkMode: false,
+  preferredProvider: "overpass",
+  activeProvider: "overpass",
 
   setScreen: (screen) => set({ screen }),
   setLocation: (userLocation) => set({ userLocation }),
@@ -89,6 +95,12 @@ export const useAppStore = create<AppState>((set) => ({
   excludeAll: (ids) => set({ excludedIds: new Set(ids) }),
   setRadius: (radius) => set({ radius }),
   setResult: (result) => set({ result }),
+  setPreferredProvider: (p) =>
+    set((state) => ({
+      preferredProvider: p,
+      specialFilters: p !== "overpass" ? new Set<string>() : state.specialFilters,
+    })),
+  setActiveProvider: (activeProvider) => set({ activeProvider }),
   reset: () =>
     set({
       screen: "home",
@@ -101,6 +113,8 @@ export const useAppStore = create<AppState>((set) => ({
       excludedIds: new Set<number>(),
       radius: 800,
       result: null,
+      preferredProvider: "overpass",
+      activeProvider: "overpass",
     }),
   toggleDarkMode: () =>
     set((state) => {

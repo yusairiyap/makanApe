@@ -1,20 +1,12 @@
 import { haversineDistance } from "./haversine";
 import { mapOSMTagsToCategory, getCategoryEmoji } from "./osmCategory";
+import { pseudoRating, pseudoPrice } from "./pseudoFields";
 import type { Restaurant } from "@/types";
 
 const ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
 ];
-
-function pseudoRating(id: number): number {
-  return Math.round(((id % 30) / 10 + 3) * 10) / 10;
-}
-
-function pseudoPrice(id: number): "💰" | "💰💰" | "💰💰💰" {
-  const v = id % 3;
-  return v === 0 ? "💰" : v === 1 ? "💰💰" : "💰💰💰";
-}
 
 export async function fetchRestaurantsByKeyword(
   lat: number,
@@ -72,6 +64,7 @@ export async function fetchRestaurantsByKeyword(
         emoji: getCategoryEmoji(category),
         priceRange: pseudoPrice(el.id),
         openNow: null,
+        provider: "overpass" as const,
       };
     })
     .sort((a: Restaurant, b: Restaurant) => a.distance - b.distance);
@@ -137,6 +130,7 @@ export async function fetchNearbyRestaurants(
         emoji: getCategoryEmoji(category),
         priceRange: pseudoPrice(el.id),
         openNow: null,
+        provider: "overpass" as const,
       };
     })
     .sort((a: Restaurant, b: Restaurant) => a.distance - b.distance)
