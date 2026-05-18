@@ -237,50 +237,47 @@ export default function HomePage() {
               <span style={{ color: "#c4a882", fontSize: 12 }}>·</span>
               <span style={{ fontSize: 12, color: "#9a7a60", fontWeight: 500 }}>{allRestaurants.length} kedai</span>
             </div>
-            <button
-              onClick={handleChangeLocation}
-              style={{
-                padding: "6px 14px", background: "#fff", border: "1.5px solid #f0d5b5",
-                borderRadius: 50, fontSize: 12, fontWeight: 700, color: "#9a6b4b",
-                cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                transition: "all 0.18s",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#E63946";
-                (e.currentTarget as HTMLElement).style.color = "#E63946";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#f0d5b5";
-                (e.currentTarget as HTMLElement).style.color = "#9a6b4b";
-              }}
-            >
-              ✏️ Tukar kawasan
-            </button>
-            {usingCache && (
+            <div style={{
+              display: "inline-flex", alignItems: "center",
+              background: "#fff", border: "1.5px solid #f0d5b5",
+              borderRadius: 50, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              overflow: "hidden",
+            }}>
               <button
-                onClick={() => {
-                  setUsingCache(false);
-                  bypassCacheRef.current = true;
-                  setRetryCount(c => c + 1);
-                }}
+                onClick={handleChangeLocation}
                 style={{
-                  padding: "6px 14px", background: "#fff", border: "1.5px solid #f0d5b5",
-                  borderRadius: 50, fontSize: 12, fontWeight: 700, color: "#9a6b4b",
-                  cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  transition: "all 0.18s",
+                  padding: "6px 14px", background: "transparent", border: "none",
+                  fontSize: 12, fontWeight: 700, color: "#9a6b4b",
+                  cursor: "pointer", transition: "color 0.18s",
                 }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "#F4A261";
-                  (e.currentTarget as HTMLElement).style.color = "#c47a35";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "#f0d5b5";
-                  (e.currentTarget as HTMLElement).style.color = "#9a6b4b";
-                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#E63946"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9a6b4b"}
               >
-                🔄 Ambil data baru
+                ✏️ Tukar kawasan
               </button>
-            )}
+              {usingCache && (
+                <>
+                  <span style={{ width: 1, alignSelf: "stretch", background: "#f0d5b5" }} />
+                  <button
+                    onClick={() => {
+                      setUsingCache(false);
+                      bypassCacheRef.current = true;
+                      setRetryCount(c => c + 1);
+                    }}
+                    title="Ambil data baru"
+                    style={{
+                      padding: "6px 10px", background: "transparent", border: "none",
+                      fontSize: 14, color: "#9a6b4b",
+                      cursor: "pointer", transition: "color 0.18s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c47a35"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9a6b4b"}
+                  >
+                    🔄
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
