@@ -15,6 +15,7 @@ interface AppState {
   screen: AppScreen;
   userLocation: UserLocation | null;
   allRestaurants: Restaurant[];
+  specialRestaurants: Restaurant[];
   selectedCategories: Set<FoodCategory>;
   specialFilters: Set<string>;
   excludedIds: Set<number>;
@@ -24,6 +25,7 @@ interface AppState {
   setScreen: (s: AppScreen) => void;
   setLocation: (loc: UserLocation) => void;
   setRestaurants: (list: Restaurant[]) => void;
+  setSpecialRestaurants: (list: Restaurant[]) => void;
   toggleCategory: (cat: FoodCategory) => void;
   toggleSpecialFilter: (filter: string) => void;
   toggleExclude: (id: number) => void;
@@ -37,6 +39,7 @@ export const useAppStore = create<AppState>((set) => ({
   screen: "home",
   userLocation: null,
   allRestaurants: [],
+  specialRestaurants: [],
   selectedCategories: new Set(ALL_CATEGORIES),
   specialFilters: new Set<string>(),
   excludedIds: new Set<number>(),
@@ -46,6 +49,7 @@ export const useAppStore = create<AppState>((set) => ({
   setScreen: (screen) => set({ screen }),
   setLocation: (userLocation) => set({ userLocation }),
   setRestaurants: (allRestaurants) => set({ allRestaurants }),
+  setSpecialRestaurants: (specialRestaurants) => set({ specialRestaurants }),
   toggleCategory: (cat) =>
     set((state) => {
       const next = new Set(state.selectedCategories);
@@ -73,6 +77,7 @@ export const useAppStore = create<AppState>((set) => ({
       screen: "home",
       userLocation: null,
       allRestaurants: [],
+      specialRestaurants: [],
       selectedCategories: new Set(ALL_CATEGORIES),
       specialFilters: new Set<string>(),
       excludedIds: new Set<number>(),

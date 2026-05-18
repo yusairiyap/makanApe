@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { fetchNearbyRestaurants } from "@/lib/overpass";
+import { fetchNearbyRestaurants, fetchRestaurantsByKeyword } from "@/lib/overpass";
 import LocationScreen from "@/components/LocationScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import FilterBar from "@/components/FilterBar";
@@ -17,6 +17,7 @@ export default function HomePage() {
     screen, setScreen,
     userLocation, setLocation,
     allRestaurants, setRestaurants,
+    specialRestaurants, setSpecialRestaurants,
     selectedCategories, specialFilters, excludedIds, radius,
     result, setResult, reset, clearExcludes,
   } = useAppStore();
@@ -27,6 +28,7 @@ export default function HomePage() {
   const [filterOpen, setFilterOpen] = useState(true);
   const [fetchError, setFetchError] = useState<"empty" | "error" | null>(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [isSpecialFetching, setIsSpecialFetching] = useState(false);
   const prevLocationKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -70,6 +72,27 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation, radius, retryCount]);
 
+  useEffect(() => {
+    if (!userLocation || specialFilters.size === 0) {
+      setSpecialRestaurants([]);
+      return;
+    }
+    setIsSpecialFetching(true);
+    Promise.all(
+      [...specialFilters].map(kw =>
+        fetchRestaurantsByKeyword(userLocation.lat, userLocation.lng, radius, kw)
+          .catch(() => [] as Restaurant[])
+      )
+    ).then(results => {
+      const merged = new Map<number, Restaurant>();
+      for (const list of results) {
+        for (const r of list) merged.set(r.id, r);
+      }
+      setSpecialRestaurants([...merged.values()].sort((a, b) => a.distance - b.distance));
+    }).finally(() => setIsSpecialFetching(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [specialFilters, userLocation, radius]);
+
   function handleLocation(loc: UserLocation) {
     setLocation(loc);
   }
@@ -91,15 +114,13 @@ export default function HomePage() {
     reset();
   }
 
-  const filteredRestaurants = allRestaurants.filter(r => {
-    if (!selectedCategories.has(r.category)) return false;
-    if (r.distance > radius) return false;
-    if (specialFilters.size > 0) {
-      const nameLower = r.name.toLowerCase();
-      if (![...specialFilters].some(kw => nameLower.includes(kw))) return false;
-    }
-    return true;
-  });
+  const filteredRestaurants = specialFilters.size > 0
+    ? specialRestaurants.filter(r => r.distance <= radius)
+    : allRestaurants.filter(r => {
+        if (!selectedCategories.has(r.category)) return false;
+        if (r.distance > radius) return false;
+        return true;
+      });
 
   const wheelRestaurants = filteredRestaurants.filter(r => !excludedIds.has(r.id));
 
@@ -310,8 +331,8 @@ export default function HomePage() {
             justifyContent: "center",
             gap: 10,
             borderRadius: 24,
-            opacity: isFetching ? 1 : 0,
-            pointerEvents: isFetching ? "auto" : "none",
+            opacity: isFetching || isSpecialFetching ? 1 : 0,
+            pointerEvents: isFetching || isSpecialFetching ? "auto" : "none",
             transition: "opacity 0.3s ease",
           }}>
             <span className="animate-spin-slow" style={{ fontSize: 28, display: "inline-block" }}>🎡</span>
