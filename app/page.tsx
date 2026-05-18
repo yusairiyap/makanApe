@@ -341,7 +341,7 @@ export default function HomePage() {
         </div>
 
         {/* Restaurant list card */}
-        {filteredRestaurants.length > 0 && (
+        {(isFetching || isSpecialFetching || filteredRestaurants.length > 0) && (
           <div
             className="animate-slide-up delay-400"
             style={{
@@ -352,7 +352,10 @@ export default function HomePage() {
               border: "1px solid #f0e0cc",
             }}
           >
-            <RestaurantList restaurants={filteredRestaurants} />
+            <RestaurantList
+              restaurants={filteredRestaurants}
+              isLoading={isFetching || isSpecialFetching}
+            />
           </div>
         )}
 
