@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/store/appStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { fetchNearbyRestaurants, fetchRestaurantsByKeyword } from "@/lib/overpass";
+import { getTheme } from "@/lib/theme";
 import LocationScreen from "@/components/LocationScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import FilterBar from "@/components/FilterBar";
@@ -21,7 +22,10 @@ export default function HomePage() {
     specialRestaurants, setSpecialRestaurants,
     selectedCategories, specialFilters, excludedIds, radius,
     result, setResult, reset, clearExcludes,
+    darkMode, toggleDarkMode,
   } = useAppStore();
+
+  const t = getTheme(darkMode);
 
   const { location: gpsLocation, gpsBlocked, requestGPS } = useGeolocation();
   const [confetti, setConfetti] = useState(false);
@@ -35,6 +39,17 @@ export default function HomePage() {
   const [cacheTimestamp, setCacheTimestamp] = useState<number | null>(null);
   const prevLocationKeyRef = useRef<string | null>(null);
   const bypassCacheRef = useRef(false);
+
+  // Hydrate darkMode from localStorage on first mount
+  useEffect(() => {
+    const saved = localStorage.getItem("makanape-dark");
+    if (saved === "1") useAppStore.setState({ darkMode: true });
+  }, []);
+
+  // Keep body background in sync with dark mode
+  useEffect(() => {
+    document.body.style.background = darkMode ? "#1a0d05" : "#FFF8F0";
+  }, [darkMode]);
 
   useEffect(() => {
     if (gpsLocation) handleLocation(gpsLocation);
@@ -167,12 +182,51 @@ export default function HomePage() {
     requestGPS();
   }
 
+  const darkToggleBtn = (
+    <button
+      onClick={toggleDarkMode}
+      title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      style={{
+        position: "fixed",
+        top: 16,
+        right: 16,
+        zIndex: 1000,
+        width: 42,
+        height: 42,
+        borderRadius: "50%",
+        background: darkMode ? "#f0dcc8" : "#2a1508",
+        border: "none",
+        cursor: "pointer",
+        fontSize: 19,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 2px 14px rgba(0,0,0,0.28)",
+        transition: "background 0.25s, transform 0.15s",
+      }}
+      onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = "scale(1.12)"}
+      onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = "scale(1)"}
+    >
+      {darkMode ? "☀️" : "🌙"}
+    </button>
+  );
+
   if (!userLocation && screen === "home") {
-    return <LocationScreen onLocation={handleLocation} onGPS={handleGPS} />;
+    return (
+      <>
+        {darkToggleBtn}
+        <LocationScreen onLocation={handleLocation} onGPS={handleGPS} />
+      </>
+    );
   }
 
   if (screen === "loading") {
-    return <LoadingScreen cacheLabel={cacheLabel} />;
+    return (
+      <>
+        {darkToggleBtn}
+        <LoadingScreen cacheLabel={cacheLabel} />
+      </>
+    );
   }
 
   if (screen === "result" && result) {
@@ -181,7 +235,7 @@ export default function HomePage() {
         className="animate-fade-in"
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
+          background: t.pageBg,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -189,9 +243,9 @@ export default function HomePage() {
           padding: "24px 16px",
         }}
       >
+        {darkToggleBtn}
         <Confetti active={confetti} />
         <div style={{ width: "100%", maxWidth: 430 }}>
-          {/* Result header */}
           <div className="animate-fall-down" style={{ textAlign: "center", marginBottom: 20 }}>
             <div style={{ fontSize: 48, marginBottom: 4 }}>🎉</div>
             <h1 style={{ fontSize: 32, fontWeight: 900, color: "#E63946", letterSpacing: "-1px", marginBottom: 12 }}>
@@ -204,7 +258,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <p style={{ marginTop: 20, fontSize: 11, color: "#c9a882" }}>
+        <p style={{ marginTop: 20, fontSize: 11, color: t.textMuted }}>
           © OpenStreetMap contributors · developed by yusairi yap
         </p>
       </div>
@@ -214,12 +268,13 @@ export default function HomePage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(160deg, #FFF8F0 0%, #FDEBD0 60%, #ffe0c0 100%)",
+      background: t.pageBg,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       padding: "24px 16px 32px",
     }}>
+      {darkToggleBtn}
       <div style={{ width: "100%", maxWidth: 430, display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* App header */}
@@ -233,17 +288,17 @@ export default function HomePage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "6px 14px", background: "#fff", borderRadius: 50,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.08)", border: "1.5px solid #f0d5b5",
+              padding: "6px 14px", background: t.cardBg, borderRadius: 50,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)", border: `1.5px solid ${t.cardBorder}`,
             }}>
               <span style={{ fontSize: 13 }}>📍</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#7a5a40" }}>{userLocation?.label}</span>
-              <span style={{ color: "#c4a882", fontSize: 12 }}>·</span>
-              <span style={{ fontSize: 12, color: "#9a7a60", fontWeight: 500 }}>{allRestaurants.length} kedai</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: t.textSub }}>{userLocation?.label}</span>
+              <span style={{ color: t.textMuted, fontSize: 12 }}>·</span>
+              <span style={{ fontSize: 12, color: t.textMuted, fontWeight: 500 }}>{allRestaurants.length} kedai</span>
             </div>
             <div style={{
               display: "inline-flex", alignItems: "center",
-              background: "#fff", border: "1.5px solid #f0d5b5",
+              background: t.cardBg, border: `1.5px solid ${t.cardBorder}`,
               borderRadius: 50, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
               overflow: "hidden",
             }}>
@@ -251,17 +306,17 @@ export default function HomePage() {
                 onClick={handleChangeLocation}
                 style={{
                   padding: "6px 14px", background: "transparent", border: "none",
-                  fontSize: 12, fontWeight: 700, color: "#9a6b4b",
+                  fontSize: 12, fontWeight: 700, color: t.textSub,
                   cursor: "pointer", transition: "color 0.18s",
                 }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#E63946"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9a6b4b"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = t.textSub}
               >
                 ✏️ Tukar kawasan
               </button>
               {usingCache && (
                 <>
-                  <span style={{ width: 1, alignSelf: "stretch", background: "#f0d5b5" }} />
+                  <span style={{ width: 1, alignSelf: "stretch", background: t.cardBorder }} />
                   <button
                     onClick={() => {
                       setUsingCache(false);
@@ -271,11 +326,11 @@ export default function HomePage() {
                     title="Ambil data baru"
                     style={{
                       padding: "6px 10px", background: "transparent", border: "none",
-                      fontSize: 14, color: "#9a6b4b",
+                      fontSize: 14, color: t.textSub,
                       cursor: "pointer", transition: "color 0.18s",
                     }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c47a35"}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9a6b4b"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = t.textSub}
                   >
                     🔄
                   </button>
@@ -289,11 +344,11 @@ export default function HomePage() {
         <div
           className="animate-slide-up delay-100"
           style={{
-            background: "#fff",
+            background: t.cardBg,
             borderRadius: 24,
             padding: "24px 16px",
             boxShadow: "0 8px 32px rgba(230,57,70,0.1), 0 2px 12px rgba(0,0,0,0.06)",
-            border: "1px solid #f0e0cc",
+            border: `1px solid ${t.cardBorder}`,
             position: "relative",
             overflow: "hidden",
           }}
@@ -303,10 +358,10 @@ export default function HomePage() {
               <div style={{ fontSize: 48, marginBottom: 12 }}>
                 {fetchError === "empty" ? "🍽️" : "📡"}
               </div>
-              <p style={{ fontWeight: 800, fontSize: 16, color: "#3d2b1a", marginBottom: 6 }}>
+              <p style={{ fontWeight: 800, fontSize: 16, color: t.text, marginBottom: 6 }}>
                 {fetchError === "empty" ? "Takde kedai dijumpai" : "Gagal sambung ke Overpass"}
               </p>
-              <p style={{ fontSize: 13, color: "#9a7a60", marginBottom: 20 }}>
+              <p style={{ fontSize: 13, color: t.textSub, marginBottom: 20 }}>
                 {fetchError === "empty"
                   ? "Cuba besarkan radius atau tukar kategori."
                   : "Overpass API tak boleh dihubungi. Cuba lagi sekejap."}
@@ -332,11 +387,11 @@ export default function HomePage() {
             <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} cacheTimestamp={cacheTimestamp} />
           )}
 
-          {/* Inline loading overlay — only for radius/retry changes, not initial location load */}
+          {/* Inline loading overlay */}
           <div style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(255, 248, 240, 0.82)",
+            background: t.spinnerOverlay,
             backdropFilter: "blur(3px)",
             display: "flex",
             flexDirection: "column",
@@ -357,14 +412,13 @@ export default function HomePage() {
         <div
           className="animate-slide-up delay-200"
           style={{
-            background: "#fff",
+            background: t.cardBg,
             borderRadius: 20,
             boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
-            border: "1px solid #f0e0cc",
+            border: `1px solid ${t.cardBorder}`,
             overflow: "hidden",
           }}
         >
-          {/* Collapsible header */}
           <div
             onClick={() => setFilterOpen(o => !o)}
             style={{
@@ -388,7 +442,6 @@ export default function HomePage() {
             }}>▼</span>
           </div>
 
-          {/* Collapsible body */}
           <div style={{
             maxHeight: filterOpen ? "200px" : "0px",
             overflow: "hidden",
@@ -401,25 +454,23 @@ export default function HomePage() {
         </div>
 
         {/* Restaurant list card */}
-        {(
-          <div
-            className="animate-slide-up delay-400"
-            style={{
-              background: "#fff",
-              borderRadius: 20,
-              padding: "16px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
-              border: "1px solid #f0e0cc",
-            }}
-          >
-            <RestaurantList
-              restaurants={filteredRestaurants}
-              isLoading={isFetching || isSpecialFetching}
-            />
-          </div>
-        )}
+        <div
+          className="animate-slide-up delay-400"
+          style={{
+            background: t.cardBg,
+            borderRadius: 20,
+            padding: "16px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+            border: `1px solid ${t.cardBorder}`,
+          }}
+        >
+          <RestaurantList
+            restaurants={filteredRestaurants}
+            isLoading={isFetching || isSpecialFetching}
+          />
+        </div>
 
-        {/* OSM contribution — add a missing place */}
+        {/* OSM contribution */}
         {userLocation && (
           <div style={{ textAlign: "center" }}>
             <a
@@ -428,9 +479,9 @@ export default function HomePage() {
               rel="noopener noreferrer"
               style={{
                 fontSize: 12,
-                color: "#9a7a60",
+                color: t.textSub,
                 textDecoration: "underline",
-                textDecorationColor: "#c4a882",
+                textDecorationColor: t.textMuted,
               }}
             >
               + Missing a place? Add it to OpenStreetMap
@@ -438,7 +489,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <p style={{ textAlign: "center", fontSize: 11, color: "#c9a882" }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: t.textMuted }}>
           © OpenStreetMap contributors · developed by yusairi yap
         </p>
       </div>

@@ -21,6 +21,7 @@ interface AppState {
   excludedIds: Set<number>;
   radius: number;
   result: Restaurant | null;
+  darkMode: boolean;
 
   setScreen: (s: AppScreen) => void;
   setLocation: (loc: UserLocation) => void;
@@ -33,6 +34,7 @@ interface AppState {
   setRadius: (r: number) => void;
   setResult: (r: Restaurant | null) => void;
   reset: () => void;
+  toggleDarkMode: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -45,6 +47,7 @@ export const useAppStore = create<AppState>((set) => ({
   excludedIds: new Set<number>(),
   radius: 800,
   result: null,
+  darkMode: false,
 
   setScreen: (screen) => set({ screen }),
   setLocation: (userLocation) => set({ userLocation }),
@@ -83,6 +86,14 @@ export const useAppStore = create<AppState>((set) => ({
       excludedIds: new Set<number>(),
       radius: 800,
       result: null,
+    }),
+  toggleDarkMode: () =>
+    set((state) => {
+      const next = !state.darkMode;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("makanape-dark", next ? "1" : "0");
+      }
+      return { darkMode: next };
     }),
 }));
 

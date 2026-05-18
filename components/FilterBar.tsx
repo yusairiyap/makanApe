@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useAppStore, ALL_CATEGORIES, SPECIAL_FILTERS } from "@/store/appStore";
+import { getTheme } from "@/lib/theme";
 
 const RADIUS_OPTIONS: { value: number; label: string }[] = [
   { value: 800, label: "🚶 Jalan kaki" },
@@ -20,23 +21,6 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "Fast Food": "🍟",
   "Cafe / Drinks": "☕",
 };
-
-function fadeOverlay(side: "left" | "right", visible: boolean) {
-  return {
-    position: "absolute" as const,
-    [side]: 0,
-    top: 0,
-    bottom: 0,
-    width: 40,
-    background: side === "right"
-      ? "linear-gradient(to right, transparent, #fff)"
-      : "linear-gradient(to left, transparent, #fff)",
-    pointerEvents: "none" as const,
-    zIndex: 1,
-    opacity: visible ? 1 : 0,
-    transition: "opacity 0.2s ease",
-  };
-}
 
 function useScrollRow() {
   const ref = useRef<HTMLDivElement>(null);
@@ -62,10 +46,33 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps) {
-  const { selectedCategories, toggleCategory, specialFilters, toggleSpecialFilter, radius, setRadius } = useAppStore();
+  const { selectedCategories, toggleCategory, specialFilters, toggleSpecialFilter, radius, setRadius, darkMode } = useAppStore();
+  const t = getTheme(darkMode);
   const cats = useScrollRow();
   const radii = useScrollRow();
   const specials = useScrollRow();
+
+  const fadeLeft = darkMode
+    ? "linear-gradient(to left, transparent, #2a1508)"
+    : "linear-gradient(to left, transparent, #fff)";
+  const fadeRight = darkMode
+    ? "linear-gradient(to right, transparent, #2a1508)"
+    : "linear-gradient(to right, transparent, #fff)";
+
+  function fadeOverlay(side: "left" | "right", visible: boolean) {
+    return {
+      position: "absolute" as const,
+      [side]: 0,
+      top: 0,
+      bottom: 0,
+      width: 40,
+      background: side === "right" ? fadeRight : fadeLeft,
+      pointerEvents: "none" as const,
+      zIndex: 1,
+      opacity: visible ? 1 : 0,
+      transition: "opacity 0.2s ease",
+    };
+  }
 
   function handleRadius(r: number) {
     setRadius(r);
@@ -74,7 +81,7 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
 
   return (
     <div style={{ width: "100%", pointerEvents: isLoading ? "none" : "auto", opacity: isLoading ? 0.45 : 1, transition: "opacity 0.25s ease" }}>
-      {/* Category chips — horizontal scroll */}
+      {/* Category chips */}
       <div style={{ position: "relative", marginBottom: 2 }}>
         <div
           ref={cats.ref}
@@ -101,9 +108,9 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
                   flexShrink: 0,
                   padding: "7px 14px",
                   borderRadius: 50,
-                  border: active ? "2px solid #E63946" : "2px solid #e8d5c0",
-                  background: active ? "linear-gradient(135deg, #E63946, #c1121f)" : "#fff",
-                  color: active ? "#fff" : "#7a5a40",
+                  border: active ? "2px solid #E63946" : `2px solid ${t.cardBorder}`,
+                  background: active ? "linear-gradient(135deg, #E63946, #c1121f)" : t.chipBg,
+                  color: active ? "#fff" : t.chipText,
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -125,7 +132,7 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
         <div style={fadeOverlay("right", true)} />
       </div>
 
-      {/* Radius options — horizontal scroll */}
+      {/* Radius options */}
       <div style={{ position: "relative" }}>
         <div
           ref={radii.ref}
@@ -155,13 +162,13 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
                   borderRadius: 50,
                   border: active
                     ? `2px solid ${isWalkable ? "#F4A261" : "#E63946"}`
-                    : "2px solid #e8d5c0",
+                    : `2px solid ${t.cardBorder}`,
                   background: active
-                    ? isWalkable ? "linear-gradient(135deg, #F4A261, #e07b39)" : "#fff5f5"
-                    : "#fff",
+                    ? isWalkable ? "linear-gradient(135deg, #F4A261, #e07b39)" : (darkMode ? "#3a1508" : "#fff5f5")
+                    : t.chipBg,
                   color: active
                     ? isWalkable ? "#fff" : "#E63946"
-                    : "#9a7a60",
+                    : t.chipText,
                   fontSize: 11,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -212,9 +219,9 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
                   flexShrink: 0,
                   padding: "6px 12px",
                   borderRadius: 50,
-                  border: active ? "2px solid #F4A261" : "2px solid #e8d5c0",
-                  background: active ? "linear-gradient(135deg, #F4A261, #e07b39)" : "#fff",
-                  color: active ? "#fff" : "#9a7a60",
+                  border: active ? "2px solid #F4A261" : `2px solid ${t.cardBorder}`,
+                  background: active ? "linear-gradient(135deg, #F4A261, #e07b39)" : t.chipBg,
+                  color: active ? "#fff" : t.chipText,
                   fontSize: 11,
                   fontWeight: 700,
                   cursor: "pointer",
