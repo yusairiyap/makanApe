@@ -164,7 +164,7 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
       </div>
 
       {/* Actions */}
-      <div style={{ padding: "16px 20px 20px", display: "flex", gap: 10 }}>
+      <div style={{ padding: "16px 20px 12px", display: "flex", gap: 10 }}>
         <button
           onClick={onTryAgain}
           style={{
@@ -216,6 +216,40 @@ export default function ResultCard({ restaurant, onTryAgain }: ResultCardProps) 
         >
           📤 Share
         </button>
+      </div>
+
+      {/* OSM contribution — improve existing listing */}
+      <div style={{ padding: "0 20px 20px" }}>
+        <a
+          href={`https://www.openstreetmap.org/edit?node=${restaurant.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "11px 0",
+            textAlign: "center",
+            border: "1.5px solid #F4A261",
+            borderRadius: 16,
+            color: "#c05c00",
+            fontWeight: 700,
+            fontSize: 13,
+            textDecoration: "none",
+            background: "#fff",
+            transition: "all 0.18s",
+            boxSizing: "border-box",
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = "#fff5e6";
+            (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = "#fff";
+            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+          }}
+        >
+          ✏️ Improve this listing on OpenStreetMap
+        </a>
       </div>
     </div>
   );
