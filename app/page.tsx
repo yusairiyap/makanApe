@@ -359,6 +359,25 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* OSM contribution — add a missing place */}
+        {userLocation && (
+          <div style={{ textAlign: "center" }}>
+            <a
+              href={`https://www.openstreetmap.org/edit#map=19/${userLocation.lat}/${userLocation.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: 12,
+                color: "#9a7a60",
+                textDecoration: "underline",
+                textDecorationColor: "#c4a882",
+              }}
+            >
+              + Missing a place? Add it to OpenStreetMap
+            </a>
+          </div>
+        )}
+
         <p style={{ textAlign: "center", fontSize: 11, color: "#c9a882" }}>
           © OpenStreetMap contributors · developed by yusairi yap
         </p>
