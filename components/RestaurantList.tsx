@@ -10,7 +10,7 @@ interface RestaurantListProps {
 }
 
 export default function RestaurantList({ restaurants, isLoading }: RestaurantListProps) {
-  const { excludedIds, toggleExclude, darkMode } = useAppStore();
+  const { excludedIds, toggleExclude, clearExcludes, excludeAll, darkMode } = useAppStore();
   const t = getTheme(darkMode);
   const [search, setSearch] = useState("");
 
@@ -63,12 +63,33 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
         <p style={{ fontSize: 11, fontWeight: 800, color: "#b8845a", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
           Dalam wheel ni 🍽️
         </p>
-        <p style={{ fontSize: 11, color: t.textSub, margin: 0, fontWeight: 600 }}>
-          {activeCount} aktif
-          {excludedCount > 0 && (
-            <span style={{ color: "#E63946" }}> · {excludedCount} excluded</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <p style={{ fontSize: 11, color: t.textSub, margin: 0, fontWeight: 600 }}>
+            {activeCount} aktif
+            {excludedCount > 0 && (
+              <span style={{ color: "#E63946" }}> · {excludedCount} excluded</span>
+            )}
+          </p>
+          {restaurants.length > 0 && (
+            <>
+              <span style={{ color: t.textMuted, fontSize: 10 }}>·</span>
+              <button
+                onClick={() => excludeAll(restaurants.map(r => r.id))}
+                title="Exclude all from wheel"
+                style={{ fontSize: 10, fontWeight: 700, color: "#E63946", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}
+              >
+                Untick All
+              </button>
+              <button
+                onClick={clearExcludes}
+                title="Restore all to wheel"
+                style={{ fontSize: 10, fontWeight: 700, color: "#38a169", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}
+              >
+                Tick All
+              </button>
+            </>
           )}
-        </p>
+        </div>
       </div>
 
       {/* Search input */}
@@ -151,7 +172,7 @@ export default function RestaurantList({ restaurants, isLoading }: RestaurantLis
                   {r.name}
                 </p>
                 <p style={{ fontSize: 11, color: t.textSub, margin: 0 }}>
-                  {r.category} · {r.distance < 1000 ? `${r.distance}m` : `${(r.distance / 1000).toFixed(1)}km`}
+                  {r.category} · {r.distance < 1000 ? `${r.distance}m` : `${(r.distance / 1000).toFixed(1)}km`} · {r.priceRange}
                 </p>
               </div>
               <button

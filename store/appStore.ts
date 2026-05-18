@@ -6,6 +6,8 @@ const ALL_CATEGORIES: FoodCategory[] = [
   "Japanese / Korean", "Fast Food", "Cafe / Drinks",
 ];
 
+const ALL_PRICES: Array<"💰" | "💰💰" | "💰💰💰"> = ["💰", "💰💰", "💰💰💰"];
+
 const SPECIAL_FILTERS: { key: string; label: string; emoji: string }[] = [
   { key: "ayam gepok", label: "Ayam Gepok", emoji: "🍗" },
   { key: "matcha", label: "Matcha", emoji: "🍵" },
@@ -17,6 +19,7 @@ interface AppState {
   allRestaurants: Restaurant[];
   specialRestaurants: Restaurant[];
   selectedCategories: Set<FoodCategory>;
+  selectedPrices: Set<"💰" | "💰💰" | "💰💰💰">;
   specialFilters: Set<string>;
   excludedIds: Set<number>;
   radius: number;
@@ -28,9 +31,11 @@ interface AppState {
   setRestaurants: (list: Restaurant[]) => void;
   setSpecialRestaurants: (list: Restaurant[]) => void;
   toggleCategory: (cat: FoodCategory) => void;
+  togglePrice: (p: "💰" | "💰💰" | "💰💰💰") => void;
   toggleSpecialFilter: (filter: string) => void;
   toggleExclude: (id: number) => void;
   clearExcludes: () => void;
+  excludeAll: (ids: number[]) => void;
   setRadius: (r: number) => void;
   setResult: (r: Restaurant | null) => void;
   reset: () => void;
@@ -43,6 +48,7 @@ export const useAppStore = create<AppState>((set) => ({
   allRestaurants: [],
   specialRestaurants: [],
   selectedCategories: new Set(ALL_CATEGORIES),
+  selectedPrices: new Set(ALL_PRICES),
   specialFilters: new Set<string>(),
   excludedIds: new Set<number>(),
   radius: 800,
@@ -60,6 +66,13 @@ export const useAppStore = create<AppState>((set) => ({
       next.has(cat) ? next.delete(cat) : next.add(cat);
       return { selectedCategories: next };
     }),
+  togglePrice: (p) =>
+    set((state) => {
+      const next = new Set(state.selectedPrices);
+      if (next.has(p) && next.size === 1) return {};
+      next.has(p) ? next.delete(p) : next.add(p);
+      return { selectedPrices: next };
+    }),
   toggleSpecialFilter: (filter) =>
     set((state) => {
       const next = new Set(state.specialFilters);
@@ -73,6 +86,7 @@ export const useAppStore = create<AppState>((set) => ({
       return { excludedIds: next };
     }),
   clearExcludes: () => set({ excludedIds: new Set<number>() }),
+  excludeAll: (ids) => set({ excludedIds: new Set(ids) }),
   setRadius: (radius) => set({ radius }),
   setResult: (result) => set({ result }),
   reset: () =>
@@ -82,6 +96,7 @@ export const useAppStore = create<AppState>((set) => ({
       allRestaurants: [],
       specialRestaurants: [],
       selectedCategories: new Set(ALL_CATEGORIES),
+      selectedPrices: new Set(ALL_PRICES),
       specialFilters: new Set<string>(),
       excludedIds: new Set<number>(),
       radius: 800,
@@ -97,4 +112,4 @@ export const useAppStore = create<AppState>((set) => ({
     }),
 }));
 
-export { ALL_CATEGORIES, SPECIAL_FILTERS };
+export { ALL_CATEGORIES, ALL_PRICES, SPECIAL_FILTERS };
