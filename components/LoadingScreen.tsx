@@ -6,22 +6,22 @@ import type { DataProvider } from "@/types";
 
 const PHASES: Record<DataProvider, { after: number; msg: string }[]> = {
   overpass: [
-    { after: 0,  msg: "Looking for restaurants nearby..." },
-    { after: 3,  msg: "Reaching out to OpenStreetMap..." },
-    { after: 8,  msg: "OSM is taking its time — still waiting..." },
-    { after: 16, msg: "Nearly there, OSM can be slow sometimes 😅" },
+    { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
+    { after: 3,  msg: "Tanya OpenStreetMap jap..." },
+    { after: 8,  msg: "OSM tu slow sikit, sabar ye... ☕" },
+    { after: 16, msg: "Alamak lama gila ni, almost done kot 😅" },
   ],
   geoapify: [
-    { after: 0,  msg: "Looking for restaurants nearby..." },
-    { after: 3,  msg: "Pinging Geoapify..." },
-    { after: 8,  msg: "Geoapify tengah sibuk sikit..." },
-    { after: 16, msg: "Sabar ya, almost done 😅" },
+    { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
+    { after: 3,  msg: "Geoapify tengah kita tanya ni..." },
+    { after: 8,  msg: "Entah kenapa lambat sikit hari ni... 🤔" },
+    { after: 16, msg: "Eh lagi jap ye, nak siap dah ni 😅" },
   ],
   tomtom: [
-    { after: 0,  msg: "Looking for restaurants nearby..." },
-    { after: 3,  msg: "Asking TomTom for directions... to food 🗺️" },
-    { after: 8,  msg: "TomTom is recalculating... 😅" },
-    { after: 16, msg: "Nearly there, hang tight!" },
+    { after: 0,  msg: "Tengah cari kedai makan berdekatan..." },
+    { after: 3,  msg: "TomTom tengah kira route ke perut kita... 🗺️" },
+    { after: 8,  msg: "TomTom tu recalculating la pulak..." },
+    { after: 16, msg: "Lagi sikit je, jangan give up! 😅" },
   ],
 };
 
