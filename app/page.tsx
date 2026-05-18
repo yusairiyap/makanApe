@@ -20,7 +20,7 @@ export default function HomePage() {
     userLocation, setLocation,
     allRestaurants, setRestaurants,
     specialRestaurants, setSpecialRestaurants,
-    selectedCategories, specialFilters, excludedIds, radius,
+    selectedCategories, selectedPrices, specialFilters, excludedIds, radius,
     result, setResult, reset, clearExcludes,
     darkMode, toggleDarkMode,
   } = useAppStore();
@@ -172,6 +172,7 @@ export default function HomePage() {
     ? specialRestaurants.filter(r => r.distance <= radius)
     : allRestaurants.filter(r => {
         if (!selectedCategories.has(r.category)) return false;
+        if (!selectedPrices.has(r.priceRange)) return false;
         if (r.distance > radius) return false;
         return true;
       });
@@ -446,7 +447,7 @@ export default function HomePage() {
           </div>
 
           <div style={{
-            maxHeight: filterOpen ? "200px" : "0px",
+            maxHeight: filterOpen ? "260px" : "0px",
             overflow: "hidden",
             transition: "max-height 0.3s ease",
           }}>

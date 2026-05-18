@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { useAppStore, ALL_CATEGORIES, SPECIAL_FILTERS } from "@/store/appStore";
+import { useAppStore, ALL_CATEGORIES, ALL_PRICES, SPECIAL_FILTERS } from "@/store/appStore";
 import { getTheme } from "@/lib/theme";
 
 const RADIUS_OPTIONS: { value: number; label: string }[] = [
@@ -46,9 +46,10 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps) {
-  const { selectedCategories, toggleCategory, specialFilters, toggleSpecialFilter, radius, setRadius, darkMode } = useAppStore();
+  const { selectedCategories, toggleCategory, selectedPrices, togglePrice, specialFilters, toggleSpecialFilter, radius, setRadius, darkMode } = useAppStore();
   const t = getTheme(darkMode);
   const cats = useScrollRow();
+  const prices = useScrollRow();
   const radii = useScrollRow();
   const specials = useScrollRow();
 
@@ -185,6 +186,59 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
           })}
         </div>
         <div style={fadeOverlay("left", !radii.atStart)} />
+        <div style={fadeOverlay("right", true)} />
+      </div>
+
+      {/* Price filter chips */}
+      <div style={{ position: "relative", marginBottom: 2 }}>
+        <div
+          ref={prices.ref}
+          onScroll={prices.onScroll}
+          onWheel={prices.onWheel}
+          className="hide-scrollbar"
+          style={{
+            display: "flex",
+            gap: 8,
+            overflowX: "auto",
+            paddingTop: 6,
+            paddingBottom: 6,
+            paddingLeft: 6,
+            paddingRight: 36,
+            alignItems: "center",
+          }}
+        >
+          <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, color: "#b08060", letterSpacing: 0.5, paddingRight: 2 }}>
+            HARGA
+          </span>
+          {ALL_PRICES.map(p => {
+            const active = selectedPrices.has(p);
+            return (
+              <button
+                key={p}
+                onClick={() => togglePrice(p)}
+                style={{
+                  flexShrink: 0,
+                  padding: "7px 14px",
+                  borderRadius: 50,
+                  border: active ? "2px solid #38a169" : `2px solid ${t.cardBorder}`,
+                  background: active ? "linear-gradient(135deg, #38a169, #276749)" : t.chipBg,
+                  color: active ? "#fff" : t.chipText,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  transition: "all 0.18s",
+                  boxShadow: active ? "0 2px 8px rgba(56,161,105,0.25)" : "0 2px 6px rgba(0,0,0,0.06)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {p}
+              </button>
+            );
+          })}
+        </div>
+        <div style={fadeOverlay("left", !prices.atStart)} />
         <div style={fadeOverlay("right", true)} />
       </div>
 
