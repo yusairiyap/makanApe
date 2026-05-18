@@ -3,7 +3,8 @@ import { useState } from "react";
 import { geocodePlace } from "@/lib/photon";
 import { useAppStore } from "@/store/appStore";
 import { getTheme } from "@/lib/theme";
-import type { UserLocation } from "@/types";
+import ProviderSwitcher from "@/components/ProviderSwitcher";
+import type { UserLocation, DataProvider } from "@/types";
 
 const CITIES = [
   { label: "KLCC", name: "KL City Centre", lat: 3.158, lng: 101.7123, emoji: "🏙️" },
@@ -32,7 +33,7 @@ interface LocationScreenProps {
 }
 
 export default function LocationScreen({ onLocation, onGPS }: LocationScreenProps) {
-  const darkMode = useAppStore(s => s.darkMode);
+  const { darkMode, preferredProvider, setPreferredProvider, activeProvider } = useAppStore();
   const t = getTheme(darkMode);
 
   const [search, setSearch] = useState("");
@@ -182,6 +183,16 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
             {searchError}
           </div>
         )}
+
+        {/* Provider switcher */}
+        <div className="animate-slide-up delay-300" style={{ marginBottom: 16 }}>
+          <ProviderSwitcher
+            preferred={preferredProvider}
+            active={activeProvider}
+            onChange={(p: DataProvider) => setPreferredProvider(p)}
+            darkMode={darkMode}
+          />
+        </div>
 
         {/* City Grid */}
         <div className="animate-slide-up delay-300">
