@@ -33,7 +33,7 @@ interface LocationScreenProps {
 }
 
 export default function LocationScreen({ onLocation, onGPS }: LocationScreenProps) {
-  const { darkMode, preferredProvider, setPreferredProvider, activeProvider } = useAppStore();
+  const { darkMode, preferredProvider, setPreferredProvider } = useAppStore();
   const t = getTheme(darkMode);
 
   const [search, setSearch] = useState("");
@@ -188,7 +188,7 @@ export default function LocationScreen({ onLocation, onGPS }: LocationScreenProp
         <div className="animate-slide-up delay-300" style={{ marginBottom: 16 }}>
           <ProviderSwitcher
             preferred={preferredProvider}
-            active={activeProvider}
+            
             onChange={(p: DataProvider) => setPreferredProvider(p)}
             darkMode={darkMode}
           />

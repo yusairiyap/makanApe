@@ -46,7 +46,7 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps) {
-  const { selectedCategories, toggleCategory, selectedPrices, togglePrice, specialFilters, toggleSpecialFilter, radius, setRadius, darkMode, activeProvider } = useAppStore();
+  const { selectedCategories, toggleCategory, selectedPrices, togglePrice, specialFilters, toggleSpecialFilter, radius, setRadius, darkMode, preferredProvider } = useAppStore();
   const t = getTheme(darkMode);
   const cats = useScrollRow();
   const prices = useScrollRow();
@@ -243,7 +243,7 @@ export default function FilterBar({ onRadiusChange, isLoading }: FilterBarProps)
       </div>
 
       {/* Special keyword filters — Overpass only */}
-      {activeProvider === "overpass" && <div style={{ position: "relative" }}>
+      {preferredProvider === "overpass" && <div style={{ position: "relative" }}>
         <div
           ref={specials.ref}
           onScroll={specials.onScroll}

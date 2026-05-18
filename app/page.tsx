@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { useAppStore } from "@/store/appStore";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useAppStore, loadSavedProvider } from "@/store/appStore";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { fetchRestaurantsWithFallback } from "@/lib/providers";
+import { fetchRestaurantsFromProvider, ProviderError } from "@/lib/providers";
 import { fetchRestaurantsByKeyword } from "@/lib/overpass";
 import { getTheme } from "@/lib/theme";
 import LocationScreen from "@/components/LocationScreen";
@@ -16,6 +16,18 @@ import ProviderSwitcher from "@/components/ProviderSwitcher";
 import { saveRestaurantCache, getCachedRestaurants } from "@/lib/restaurantCache";
 import type { Restaurant, UserLocation, DataProvider } from "@/types";
 
+const PROVIDER_TIMEOUT_MESSAGES: Record<DataProvider, { emoji: string; text: string }> = {
+  overpass: { emoji: "🐢", text: "Overpass penat sikit... data lambat nak sampai" },
+  geoapify: { emoji: "😅", text: "Geoapify tengah sibuk rupanya..." },
+  tomtom: { emoji: "🗺️", text: "TomTom sesat sekejap la pulak" },
+};
+
+const PROVIDER_ERROR_MESSAGES: Record<DataProvider, { emoji: string; text: string }> = {
+  overpass: { emoji: "📡", text: "Tak dapat sambung ke Overpass" },
+  geoapify: { emoji: "📡", text: "Tak dapat sambung ke Geoapify" },
+  tomtom: { emoji: "📡", text: "Tak dapat sambung ke TomTom" },
+};
+
 export default function HomePage() {
   const {
     screen, setScreen,
@@ -26,7 +38,6 @@ export default function HomePage() {
     result, setResult, reset, clearExcludes,
     darkMode, toggleDarkMode,
     preferredProvider, setPreferredProvider,
-    activeProvider, setActiveProvider,
   } = useAppStore();
 
   const t = getTheme(darkMode);
@@ -35,19 +46,22 @@ export default function HomePage() {
   const [confetti, setConfetti] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [filterOpen, setFilterOpen] = useState(true);
-  const [fetchError, setFetchError] = useState<"empty" | "error" | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [isSpecialFetching, setIsSpecialFetching] = useState(false);
   const [cacheLabel, setCacheLabel] = useState<string | null>(null);
   const [usingCache, setUsingCache] = useState(false);
   const [cacheTimestamp, setCacheTimestamp] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ emoji: string; text: string } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevLocationKeyRef = useRef<string | null>(null);
   const bypassCacheRef = useRef(false);
 
-  // Hydrate darkMode from localStorage on first mount
+  // Hydrate darkMode and provider from localStorage on first mount
   useEffect(() => {
-    const saved = localStorage.getItem("makanape-dark");
-    if (saved === "1") useAppStore.setState({ darkMode: true });
+    const savedDark = localStorage.getItem("makanape-dark");
+    if (savedDark === "1") useAppStore.setState({ darkMode: true });
+    const savedProvider = loadSavedProvider();
+    useAppStore.setState({ preferredProvider: savedProvider });
   }, []);
 
   // Keep body background in sync with dark mode
@@ -66,6 +80,12 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gpsBlocked]);
 
+  const showToast = useCallback((msg: { emoji: string; text: string }) => {
+    setToast(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 5000);
+  }, []);
+
   useEffect(() => {
     if (!userLocation) return;
 
@@ -76,9 +96,7 @@ export default function HomePage() {
     const skipCache = bypassCacheRef.current;
     bypassCacheRef.current = false;
 
-    setFetchError(null);
-
-    const cached = skipCache ? null : getCachedRestaurants(userLocation.lat, userLocation.lng, radius);
+    const cached = skipCache ? null : getCachedRestaurants(userLocation.lat, userLocation.lng, radius, preferredProvider);
     if (cached) {
       setCacheLabel(cached.label);
       if (isNewLocation) {
@@ -89,7 +107,6 @@ export default function HomePage() {
       setTimeout(() => {
         setRestaurants(cached.restaurants);
         clearExcludes();
-        setFetchError(cached.restaurants.length === 0 ? "empty" : null);
         setUsingCache(true);
         setCacheTimestamp(cached.timestamp);
         setCacheLabel(null);
@@ -108,19 +125,24 @@ export default function HomePage() {
       setIsFetching(true);
     }
 
-    fetchRestaurantsWithFallback(userLocation.lat, userLocation.lng, radius, preferredProvider)
-      .then(({ restaurants, provider }) => {
-        setActiveProvider(provider);
+    fetchRestaurantsFromProvider(userLocation.lat, userLocation.lng, radius, preferredProvider)
+      .then((restaurants) => {
         setRestaurants(restaurants);
         clearExcludes();
-        setFetchError(restaurants.length === 0 ? "empty" : null);
         if (restaurants.length > 0) {
-          saveRestaurantCache(userLocation.lat, userLocation.lng, radius, userLocation.label, restaurants);
+          saveRestaurantCache(userLocation.lat, userLocation.lng, radius, userLocation.label, restaurants, preferredProvider);
         }
       })
-      .catch(() => {
+      .catch((e: unknown) => {
         setRestaurants([]);
-        setFetchError("error");
+        if (e instanceof ProviderError) {
+          const msgs = e.code === "timeout"
+            ? PROVIDER_TIMEOUT_MESSAGES[preferredProvider]
+            : PROVIDER_ERROR_MESSAGES[preferredProvider];
+          showToast(msgs);
+        } else {
+          showToast(PROVIDER_ERROR_MESSAGES[preferredProvider]);
+        }
       })
       .finally(() => {
         setIsFetching(false);
@@ -130,7 +152,7 @@ export default function HomePage() {
   }, [userLocation, radius, retryCount, preferredProvider]);
 
   useEffect(() => {
-    if (activeProvider !== "overpass") {
+    if (preferredProvider !== "overpass") {
       setSpecialRestaurants([]);
       return;
     }
@@ -171,7 +193,6 @@ export default function HomePage() {
   }
 
   function handleChangeLocation() {
-    setFetchError(null);
     setUsingCache(false);
     setCacheTimestamp(null);
     reset();
@@ -277,6 +298,10 @@ export default function HomePage() {
     );
   }
 
+  // Determine empty state for wheel area
+  const noRestaurantsAtAll = allRestaurants.length === 0 && !isFetching;
+  const filteredToZero = !noRestaurantsAtAll && wheelRestaurants.length === 0 && !isFetching;
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -288,6 +313,61 @@ export default function HomePage() {
       padding: "24px 16px 32px",
     }}>
       {darkToggleBtn}
+
+      {/* Fun toast for provider errors/timeouts */}
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 2000,
+            background: darkMode ? "#2a1208" : "#fff8f0",
+            border: `1.5px solid ${darkMode ? "#5a2e10" : "#f4c08a"}`,
+            borderRadius: 18,
+            padding: "12px 20px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            maxWidth: 320,
+            width: "calc(100% - 48px)",
+            animation: "slideUpFade 0.3s ease",
+          }}
+        >
+          <span style={{ fontSize: 22, flexShrink: 0 }}>{toast.emoji}</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: t.text, lineHeight: 1.4 }}>
+              {toast.text}
+            </p>
+            <p style={{ margin: "2px 0 0", fontSize: 11, color: t.textSub }}>
+              Cuba lagi atau tukar provider lain
+            </p>
+          </div>
+          <div
+            onClick={() => {
+              bypassCacheRef.current = true;
+              setRetryCount(c => c + 1);
+              setToast(null);
+            }}
+            style={{
+              padding: "6px 12px",
+              background: "linear-gradient(135deg, #E63946, #c1121f)",
+              color: "#fff",
+              fontWeight: 800,
+              fontSize: 11,
+              borderRadius: 50,
+              cursor: "pointer",
+              flexShrink: 0,
+              boxShadow: "0 2px 8px rgba(230,57,70,0.3)",
+            }}
+          >
+            🔄
+          </div>
+        </div>
+      )}
+
       <div style={{ width: "100%", maxWidth: 430, display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* App header */}
@@ -353,7 +433,6 @@ export default function HomePage() {
           </div>
           <ProviderSwitcher
             preferred={preferredProvider}
-            active={activeProvider}
             onChange={(p: DataProvider) => {
               bypassCacheRef.current = true;
               setPreferredProvider(p);
@@ -375,21 +454,17 @@ export default function HomePage() {
             overflow: "hidden",
           }}
         >
-          {fetchError ? (
+          {noRestaurantsAtAll ? (
             <div style={{ textAlign: "center", padding: "32px 16px" }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>
-                {fetchError === "empty" ? "🍽️" : "📡"}
-              </div>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🍽️</div>
               <p style={{ fontWeight: 800, fontSize: 16, color: t.text, marginBottom: 6 }}>
-                {fetchError === "empty" ? "Takde kedai dijumpai" : `Gagal sambung ke ${activeProvider === "overpass" ? "Overpass" : activeProvider === "geoapify" ? "Geoapify" : "TomTom"}`}
+                Takde kedai dijumpai
               </p>
               <p style={{ fontSize: 13, color: t.textSub, marginBottom: 20 }}>
-                {fetchError === "empty"
-                  ? "Cuba besarkan radius atau tukar kategori."
-                  : "Pelayan data tak boleh dihubungi. Cuba lagi sekejap."}
+                Cuba besarkan radius atau tukar kawasan.
               </p>
               <button
-                onClick={() => setRetryCount(c => c + 1)}
+                onClick={() => { bypassCacheRef.current = true; setRetryCount(c => c + 1); }}
                 style={{
                   padding: "12px 28px",
                   background: "linear-gradient(135deg, #E63946, #c1121f)",
@@ -404,6 +479,16 @@ export default function HomePage() {
               >
                 🔄 Cuba lagi
               </button>
+            </div>
+          ) : filteredToZero ? (
+            <div style={{ textAlign: "center", padding: "32px 16px" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
+              <p style={{ fontWeight: 800, fontSize: 16, color: t.text, marginBottom: 6 }}>
+                Takde kedai dengan filter ni
+              </p>
+              <p style={{ fontSize: 13, color: t.textSub }}>
+                Cuba longgarkan sikit filter atau besarkan radius.
+              </p>
             </div>
           ) : (
             <SpinWheel restaurants={wheelRestaurants} onResult={handleResult} cacheTimestamp={cacheTimestamp} />
@@ -470,7 +555,7 @@ export default function HomePage() {
             transition: "max-height 0.3s ease",
           }}>
             <div style={{ padding: "0 16px 14px" }}>
-              <FilterBar onRadiusChange={() => setFetchError(null)} isLoading={isFetching || isSpecialFetching} />
+              <FilterBar onRadiusChange={() => {}} isLoading={isFetching || isSpecialFetching} />
             </div>
           </div>
         </div>
@@ -493,7 +578,7 @@ export default function HomePage() {
         </div>
 
         {/* OSM contribution — only when using Overpass */}
-        {userLocation && activeProvider === "overpass" && (
+        {userLocation && preferredProvider === "overpass" && (
           <div style={{ textAlign: "center" }}>
             <a
               href={`https://www.openstreetmap.org/edit#map=19/${userLocation.lat}/${userLocation.lng}`}
